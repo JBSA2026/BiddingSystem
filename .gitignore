@@ -11,3 +11,4 @@ storage/installed.lock
 # Never commit license signing keys or the issued-licenses register
 *signing-key*.json
 issued-licenses*.csv
+cityland-bidding-cpanel.zip
