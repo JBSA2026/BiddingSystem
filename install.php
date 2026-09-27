@@ -6,6 +6,15 @@
  */
 declare(strict_types=1);
 
+// Friendly stop on old PHP versions (must stay compatible with PHP 7.x syntax up to this point).
+if (PHP_VERSION_ID < 80100) {
+    http_response_code(500);
+    header('Content-Type: text/html; charset=utf-8');
+    exit('<!doctype html><meta charset="utf-8"><title>PHP upgrade required</title><div style="font-family:sans-serif;max-width:620px;margin:60px auto;padding:24px;border:2px solid #b42318;border-radius:8px">'
+        . '<h2>PHP 8.1 or newer is required</h2><p>This server is running PHP <strong>' . htmlspecialchars(PHP_VERSION) . '</strong> for this site.</p>'
+        . '<p>In cPanel open <strong>Select PHP Version</strong> (or <strong>MultiPHP Manager</strong>), choose <strong>8.1, 8.2 or 8.3</strong> for this domain, click <em>Set as current</em>, then reload this page.</p></div>');
+}
+
 $root = __DIR__;
 $configFile = $root . '/app/config.php';
 $lockFile = $root . '/storage/installed.lock';
