@@ -32,6 +32,12 @@ Host, port, database name, user and password, from cPanel → MySQL Databases. U
 | Amazon SES | `email-smtp.<region>.amazonaws.com` | 465 | `ssl` |
 
 `driver` can be `smtp` (recommended), `mail` (PHP `mail()`), or `log` (writes emails to `storage/logs/mail.log`, for testing only).
+
+**Editing email settings without touching files:** a Super Admin can change the driver, host, port, encryption, username,
+password, From address and SSL verification in **Admin → Settings → Email settings**, then click **Save & send test email**.
+Values saved there override the `mail` block in `app/config.php`. The password is stored encrypted (AES-256-GCM, keyed by
+`app.secret_key`). Leave the password blank to keep the saved one. Saving also re-queues any failed emails.
+On cPanel, create a mailbox first (cPanel → Email Accounts, e.g. `bidding@yourdomain`) and use the *cPanel email (SSL 465)* preset.
 Emails are queued in the `email_queue` table, sent at the end of each request, and retried up to 5 times by `cron.php`.
 
 ### `sms` (mobile OTP)

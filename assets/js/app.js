@@ -351,6 +351,16 @@
     schedule();
   }
 
+  // ---------------------------------------------------------------- email settings presets (admin)
+  $all('[data-mail-preset]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var p = JSON.parse(b.getAttribute('data-mail-preset'));
+      var f = b.form;
+      f.mail_driver.value = p.driver; f.mail_host.value = p.host; f.mail_port.value = p.port; f.mail_encryption.value = p.encryption;
+      if (f.mail_username.value === '' ) f.mail_username.focus();
+    });
+  });
+
   // ---------------------------------------------------------------- misc
   $all('[data-autosubmit]').forEach(function (el) { el.addEventListener('change', function () { el.form.submit(); }); });
   $all('[data-check-all]').forEach(function (m) {

@@ -158,6 +158,13 @@ foreach (['admin/properties.php', 'admin/bidders.php', 'admin/bids.php', 'admin/
     $ADM->req($pg);
     check("Admin page {$pg} renders", $ADM->code === 200 && !str_contains($ADM->last, 'Something went wrong') && !str_contains($ADM->last, 'Warning:') && !str_contains($ADM->last, 'Fatal'), (string) $ADM->code . ' ' . substr(strip_tags($ADM->last), 0, 300));
 }
+$ADM->req('admin/settings.php');
+$ADM->req('admin/settings.php', ['_csrf' => $ADM->csrf(), 'action' => 'save_email_test', 'mail_driver' => 'log', 'mail_host' => 'mail.example.com', 'mail_port' => '465',
+    'mail_encryption' => 'ssl', 'mail_username' => 'bidding@example.com', 'mail_password' => 'MailPass!23', 'mail_from_email' => 'bidding@example.com', 'mail_from_name' => 'Cityland Bidding', 'mail_verify_ssl' => '1']);
+$encPw = (string) db()->query("SELECT svalue FROM settings WHERE skey='mail_password_enc'")->fetchColumn();
+check('Admin can edit email settings (password stored encrypted)', str_contains($ADM->last, 'test email was sent') && str_starts_with($encPw, 'v1:') && !str_contains($encPw, 'MailPass'), flashText($ADM->last));
+$ADM->req('admin/settings.php', ['_csrf' => $ADM->csrf(), 'action' => 'save_email', 'mail_driver' => 'smtp', 'mail_host' => 'bad host!', 'mail_port' => '465', 'mail_from_email' => 'x']);
+check('Invalid email settings rejected', str_contains($ADM->last, 'valid SMTP host') && db()->query("SELECT svalue FROM settings WHERE skey='mail_driver'")->fetchColumn() === 'log', flashText($ADM->last));
 $uidA = (int) db()->query("SELECT id FROM users WHERE email='juan@example.com'")->fetchColumn();
 $docA = (int) db()->query("SELECT id FROM bidder_documents WHERE user_id=$uidA")->fetchColumn();
 $ADM->req("admin/bidder_view.php?id=$uidA");

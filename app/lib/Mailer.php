@@ -10,6 +10,43 @@ final class Mailer
 {
     private static bool $shutdownRegistered = false;
 
+    /** Keys an administrator can override from Admin → Settings (stored as settings "mail_<key>"). */
+    public const ADMIN_KEYS = ['driver', 'host', 'port', 'encryption', 'username', 'password', 'from_email', 'from_name', 'verify_ssl'];
+
+    /**
+     * Effective mail setting: the admin-saved value (Admin → Settings) wins when email settings have been
+     * saved there; otherwise app/config.php. The SMTP password is stored encrypted.
+     */
+    public static function cfg(string $key): mixed
+    {
+        if (Settings::get('mail_driver', '') !== '' && in_array($key, self::ADMIN_KEYS, true)) {
+            if ($key === 'password') {
+                return Security::decryptSecret((string) Settings::get('mail_password_enc', ''));
+            }
+            $v = Settings::get('mail_' . $key);
+            if ($v !== null) {
+                return $key === 'port' ? (int) $v : ($key === 'verify_ssl' ? $v === '1' : $v);
+            }
+        }
+        $default = ['port' => 465, 'encryption' => 'ssl', 'from_name' => 'Cityland Property Bidding', 'verify_ssl' => true, 'timeout' => 15][$key] ?? '';
+        return config('mail.' . $key, $default);
+    }
+
+    /** Sender address; never empty (an empty sender makes servers reject or silently drop mail). */
+    public static function fromEmail(): string
+    {
+        $f = trim((string) self::cfg('from_email'));
+        if (filter_var($f, FILTER_VALIDATE_EMAIL)) {
+            return $f;
+        }
+        $u = trim((string) self::cfg('username'));
+        if (filter_var($u, FILTER_VALIDATE_EMAIL)) {
+            return $u;
+        }
+        $host = preg_replace('/^(www|bid|bidding)\./', '', (string) parse_url(base_url(), PHP_URL_HOST)) ?: 'localhost';
+        return 'no-reply@' . $host;
+    }
+
     /** Queue an email for delivery. */
     public static function queue(string $toEmail, ?string $toName, string $subject, string $html, ?string $template = null): void
     {
@@ -61,9 +98,9 @@ final class Mailer
 
     public static function send(string $to, string $toName, string $subject, string $html, string $text = ''): void
     {
-        $driver = (string) config('mail.driver', 'smtp');
-        $fromEmail = (string) config('mail.from_email');
-        $fromName = (string) config('mail.from_name', 'Cityland');
+        $driver = (string) (self::cfg('driver') ?: 'smtp');
+        $fromEmail = self::fromEmail();
+        $fromName = (string) (self::cfg('from_name') ?: 'Cityland Property Bidding');
         $boundary = 'b' . bin2hex(random_bytes(12));
         $text = $text !== '' ? $text : self::toText($html);
         $headers = [
@@ -98,11 +135,15 @@ final class Mailer
 
     private static function smtp(string $to, string $data): void
     {
-        $host = (string) config('mail.host');
-        $port = (int) config('mail.port', 465);
-        $enc = strtolower((string) config('mail.encryption', 'ssl'));
-        $timeout = (int) config('mail.timeout', 15);
-        $ctx = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true, 'SNI_enabled' => true]]);
+        $host = (string) self::cfg('host');
+        $port = (int) self::cfg('port');
+        $enc = strtolower((string) self::cfg('encryption'));
+        $timeout = (int) (self::cfg('timeout') ?: 15);
+        $verify = (bool) self::cfg('verify_ssl');
+        if ($host === '') {
+            throw new RuntimeException('SMTP host is not set. Enter it in Admin → Settings → Email settings.');
+        }
+        $ctx = stream_context_create(['ssl' => ['verify_peer' => $verify, 'verify_peer_name' => $verify, 'allow_self_signed' => !$verify, 'SNI_enabled' => true, 'peer_name' => $host]]);
         $remote = ($enc === 'ssl' ? 'ssl://' : 'tcp://') . $host . ':' . $port;
         $fp = @stream_socket_client($remote, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $ctx);
         if (!$fp) {
@@ -120,13 +161,13 @@ final class Mailer
                 }
                 self::cmd($fp, 'EHLO ' . $ehloHost, [250]);
             }
-            $user = (string) config('mail.username');
+            $user = (string) self::cfg('username');
             if ($user !== '') {
                 self::cmd($fp, 'AUTH LOGIN', [334]);
                 self::cmd($fp, base64_encode($user), [334]);
-                self::cmd($fp, base64_encode((string) config('mail.password')), [235]);
+                self::cmd($fp, base64_encode((string) self::cfg('password')), [235]);
             }
-            self::cmd($fp, 'MAIL FROM:<' . config('mail.from_email') . '>', [250]);
+            self::cmd($fp, 'MAIL FROM:<' . self::fromEmail() . '>', [250]);
             self::cmd($fp, 'RCPT TO:<' . $to . '>', [250, 251]);
             self::cmd($fp, 'DATA', [354]);
             // Dot-stuffing per RFC 5321

@@ -69,4 +69,31 @@ final class Security
         }
         return secure_hash('device:' . $id);
     }
+
+    /** Encrypt a secret (e.g. SMTP password) for storage in the database, keyed by app.secret_key. */
+    public static function encryptSecret(string $plain): string
+    {
+        if ($plain === '') {
+            return '';
+        }
+        $key = hash('sha256', 'secret-store:' . config('app.secret_key'), true);
+        $iv = random_bytes(12);
+        $tag = '';
+        $ct = openssl_encrypt($plain, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+        return 'v1:' . base64_encode($iv . $tag . $ct);
+    }
+
+    public static function decryptSecret(string $stored): string
+    {
+        if (!str_starts_with($stored, 'v1:')) {
+            return '';
+        }
+        $raw = base64_decode(substr($stored, 3), true);
+        if ($raw === false || strlen($raw) < 29) {
+            return '';
+        }
+        $key = hash('sha256', 'secret-store:' . config('app.secret_key'), true);
+        $plain = openssl_decrypt(substr($raw, 28), 'aes-256-gcm', $key, OPENSSL_RAW_DATA, substr($raw, 0, 12), substr($raw, 12, 16));
+        return $plain === false ? '' : $plain;
+    }
 }
