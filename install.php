@@ -80,13 +80,14 @@ $checks = [
     'mbstring extension' => extension_loaded('mbstring'),
     'OpenSSL extension' => extension_loaded('openssl'),
     'fileinfo extension' => extension_loaded('fileinfo'),
+    'sodium extension (license verification)' => function_exists('sodium_crypto_sign_verify_detached'),
     'cURL extension (reCAPTCHA / SMS)' => extension_loaded('curl'),
     'GD extension (image processing / CAPTCHA) — recommended' => extension_loaded('gd'),
     'Zip extension (file backups) — recommended' => class_exists('ZipArchive'),
     'app/ folder writable (to create config.php)' => is_writable($root . '/app'),
     'storage/ folder writable' => is_writable($root . '/storage'),
 ];
-$required = array_slice(array_keys($checks), 0, 5);
+$required = array_slice(array_keys($checks), 0, 6);
 $requiredOk = true;
 foreach ($required as $r) {
     $requiredOk = $requiredOk && $checks[$r];
@@ -205,6 +206,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $requiredOk) {
       <li><strong>Delete <code>install.php</code></strong> from the server now.</li>
       <li>Add this cron job in cPanel → <em>Cron Jobs</em> (every minute):<br><code>* * * * * php <?= h($root) ?>/cron.php &gt;/dev/null 2&gt;&amp;1</code><br>or via URL: <code><?= h($done['url']) ?>/cron.php?key=<?= h($done['cron_key']) ?></code></li>
       <li>Enable SSL (cPanel → <em>SSL/TLS Status</em> → AutoSSL) and make sure the site URL starts with https://.</li>
+      <?php if (!$done['test']): ?><li><strong>Activate your license:</strong> sign in to the admin portal — you will be taken to the <em>License</em> page. Paste the license key issued for <code><?= h(parse_url($done['url'], PHP_URL_HOST)) ?></code>.</li><?php endif; ?>
       <li>Sign in to <a href="<?= h($done['url']) ?>/admin/">the admin portal</a>, open <strong>Settings</strong>, send a test email, and review policies, Terms and the Privacy Notice.</li>
       <li>Recommended: move the <code>storage</code> folder outside <code>public_html</code> and update <code>storage_path</code> in <code>app/config.php</code>.</li>
     </ol></div>

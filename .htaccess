@@ -13,7 +13,7 @@ ServerSignature Off
 </Files>
 
 # Private folders (each also has its own deny-all .htaccess)
-RedirectMatch 404 ^/(.*/)?(app|storage|install|tools|docs|docker|tests)(/.*)?$
+RedirectMatch 404 ^/(.*/)?(app|storage|install|tools|docs|docker|tests|license-tools)(/.*)?$
 
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"

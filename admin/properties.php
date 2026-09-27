@@ -21,7 +21,10 @@ if (is_post()) {
     ];
     if (isset($map[$act])) {
         [$col, $val, $auditAction] = $map[$act];
-        if ($act === 'unpublish' && $p['status'] === 'open' && DB::val('SELECT 1 FROM bids WHERE property_id = ? LIMIT 1', [$id])) {
+        $countsTowardPlan = in_array($p['status'], ['upcoming', 'open', 'closed', 'under_evaluation'], true);
+        if ((($act === 'publish' && !(int) $p['is_archived']) || ($act === 'unarchive' && (int) $p['is_published'])) && $countsTowardPlan && ($limitErr = License::checkLimit('properties'))) {
+            flash('error', $limitErr);
+        } elseif ($act === 'unpublish' && $p['status'] === 'open' && DB::val('SELECT 1 FROM bids WHERE property_id = ? LIMIT 1', [$id])) {
             flash('error', 'A property with bids cannot be unpublished while bidding is open. Close or cancel the bidding instead.');
         } elseif ($act === 'archive' && in_array($p['status'], ['open', 'under_evaluation'], true)) {
             flash('error', 'Open or under-evaluation properties cannot be archived.');

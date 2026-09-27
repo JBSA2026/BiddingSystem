@@ -88,6 +88,12 @@ final class Auth
             flash('warning', 'Two-factor authentication is required for all administrators. Please enable it now.');
             redirect('admin/account.php');
         }
+        // Licensing: when the license is missing, invalid or past its grace period, only the License page
+        // (and own account / sign-out) remain available. Public pages and records are unaffected.
+        if (License::adminLocked() && !in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['license.php', 'account.php', 'logout.php'], true)) {
+            flash('error', License::status()['message'] . ' The admin portal is locked until a valid license is entered.');
+            redirect('admin/license.php');
+        }
         if ($permission !== null && !Rbac::can($a['role'], $permission)) {
             Audit::log('access_denied', 'permission', null, null, ['permission' => $permission, 'page' => $_SERVER['SCRIPT_NAME'] ?? '']);
             abort(403, 'Your role does not have permission for this action.');

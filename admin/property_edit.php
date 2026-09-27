@@ -169,6 +169,9 @@ if (is_post()) {
         $d['ref_no'] = $refIn;
     }
 
+    if (!$p && $chk('is_published') && ($limitErr = License::checkLimit('properties'))) {
+        $errors[] = $limitErr . ' Untick "Publish immediately" to save it as a draft.';
+    }
     if (!$errors) {
         $reqIds = array_values(array_intersect(array_map('intval', (array) ($_POST['requirements'] ?? [])), array_map('intval', array_column($reqTypes, 'id'))));
         DB::begin();

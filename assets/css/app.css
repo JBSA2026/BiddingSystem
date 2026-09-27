@@ -126,6 +126,15 @@ code { background: var(--surface-3); padding: 1px 6px; border-radius: 5px; font-
 .test-banner { background: repeating-linear-gradient(45deg, #b42318, #b42318 14px, #c2410c 14px, #c2410c 28px); color: #fff; text-align: center; padding: 6px 12px; font-size: .85rem; position: relative; z-index: 60; }
 .test-banner a { color: #fff; font-weight: 700; }
 
+/* ---------- license banner (admin) ---------- */
+.license-banner { background: var(--amber-bg); color: var(--amber); border-bottom: 1px solid var(--amber-line); text-align: center; padding: 8px 14px; font-size: .86rem; }
+.license-banner.is-grace { background: var(--red-bg); color: var(--red); border-bottom-color: var(--red-line); }
+.license-banner a { color: inherit; font-weight: 700; }
+.license-key { font-family: Consolas, Menlo, monospace; font-size: .74rem; word-break: break-all; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; max-height: 120px; overflow: auto; }
+.meter { height: 8px; background: var(--surface-3); border-radius: 6px; overflow: hidden; margin-top: 6px; }
+.meter > span { display: block; height: 100%; background: var(--brand-grad); border-radius: 6px; }
+.meter.full > span { background: var(--red); }
+
 /* ---------- header ---------- */
 .site-header { background: rgba(16, 21, 18, .92); backdrop-filter: saturate(160%) blur(12px); -webkit-backdrop-filter: saturate(160%) blur(12px); color: var(--on-panel); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--panel-line); box-shadow: 0 1px 0 rgba(62, 125, 37, .45); }
 .header-inner { display: flex; align-items: center; gap: 14px; min-height: 72px; }

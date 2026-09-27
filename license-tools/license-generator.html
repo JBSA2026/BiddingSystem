@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>License Generator · Cityland Online Property Bidding</title>
+<!--
+  VENDOR TOOL — keep on your own computer. Never upload this file or your signing key to a client server.
+  Open this file directly in Chrome, Edge, Firefox or Safari (recent versions support Ed25519 signing).
+  Everything runs locally in your browser: the signing key never leaves your computer.
+-->
+<style>
+  :root { --brand:#3e7d25; --brand-2:#2f6419; --ink:#111612; --muted:#5e6861; --line:#e1e6de; --bg:#f4f5f1; --card:#fff; --red:#b42318; --amber:#9a5b06; --green:#1f7a3a; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; background: var(--bg); color: var(--ink); font-size: 15px; line-height: 1.5; }
+  header { background: #101512; color: #fff; padding: 18px 24px; border-bottom: 3px solid var(--brand); display:flex; align-items:center; gap:14px; }
+  header .mark { width:42px; height:42px; border-radius:50%; background: linear-gradient(135deg,#4b9130,#2c5f18); display:flex; align-items:center; justify-content:center; font-weight:800; font-family: Georgia, serif; }
+  header h1 { margin:0; font-family: Georgia, serif; letter-spacing:.12em; text-transform:uppercase; font-size:1.2rem; }
+  header small { display:block; color:#8fcf6f; letter-spacing:.2em; font-size:.66rem; text-transform:uppercase; }
+  main { max-width: 1180px; margin: 0 auto; padding: 22px 16px 60px; }
+  .grid { display:grid; grid-template-columns: 1.1fr .9fr; gap: 20px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border:1px solid var(--line); border-radius: 14px; padding: 20px 22px; box-shadow: 0 6px 20px rgba(0,0,0,.05); margin-bottom: 20px; }
+  h2 { font-family: Georgia, serif; font-weight: 600; margin: 0 0 12px; font-size: 1.3rem; }
+  label { display:block; font-weight:600; font-size:.84rem; margin: 12px 0 5px; }
+  input, select, textarea { width:100%; padding: 9px 11px; border:1px solid #cdd5c9; border-radius: 9px; font: inherit; background:#fff; }
+  input:focus, select:focus, textarea:focus { outline:none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(62,125,37,.2); }
+  .row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; } .row3 { display:grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  @media (max-width: 600px) { .row, .row3 { grid-template-columns: 1fr; } }
+  .btn { display:inline-flex; align-items:center; gap:6px; border:0; border-radius:9px; padding: 10px 16px; font: inherit; font-weight: 600; cursor:pointer; background: var(--brand); color:#fff; }
+  .btn:hover { background: var(--brand-2); } .btn.secondary { background:#fff; color: var(--ink); border:1px solid #cdd5c9; } .btn.sm { padding: 6px 11px; font-size:.84rem; }
+  .btn[disabled] { opacity:.5; cursor:not-allowed; }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; } .chips button { background:#eef2ec; border:1px solid var(--line); border-radius: 16px; padding: 3px 10px; font-size:.78rem; cursor:pointer; }
+  .help { color: var(--muted); font-size: .8rem; margin-top: 4px; }
+  .status { padding: 10px 12px; border-radius: 9px; font-size: .88rem; margin: 10px 0; }
+  .ok { background:#e6f4ea; color: var(--green); border:1px solid #bfe3c9; } .err { background:#fdecea; color: var(--red); border:1px solid #f5c2bd; } .warn { background:#fef3e2; color: var(--amber); border:1px solid #f5d9a6; }
+  .key { font-family: Consolas, Menlo, monospace; font-size: .76rem; word-break: break-all; background: #f3f5f0; border:1px solid var(--line); border-radius: 9px; padding: 12px; min-height: 90px; white-space: pre-wrap; }
+  table { width:100%; border-collapse: collapse; font-size: .84rem; } th, td { text-align:left; padding: 8px 8px; border-bottom:1px solid var(--line); vertical-align: top; }
+  th { font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color: var(--muted); background:#f7f8f5; }
+  .badge { display:inline-block; padding: 2px 9px; border-radius: 12px; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+  .b-green { background:#e6f4ea; color: var(--green);} .b-amber{ background:#fef3e2; color: var(--amber);} .b-red{ background:#fdecea; color: var(--red);}
+  .muted { color: var(--muted); } code { background:#eef2ec; padding: 1px 6px; border-radius: 5px; }
+  .toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  pre.payload { background:#101512; color:#d9e7d2; border-radius: 9px; padding: 12px; font-size: .78rem; overflow:auto; }
+</style>
+</head>
+<body>
+<header><div class="mark">C</div><div><h1>Cityland</h1><small>Bidding System · License Generator</small></div></header>
+<main>
+  <div id="support" class="status warn" hidden></div>
+
+  <div class="card">
+    <h2>1. Signing key</h2>
+    <p class="muted" style="margin-top:0">Load your private signing key file (<code>cityland-license-signing-key.json</code>). It stays in this browser tab only. Keep the file offline and backed up; anyone with it can create licenses.</p>
+    <div class="toolbar">
+      <input type="file" id="keyfile" accept=".json,application/json" style="max-width:360px">
+      <span id="keystatus" class="muted">No key loaded.</span>
+    </div>
+    <details style="margin-top:10px"><summary class="muted">Key rotation: create a new signing key</summary>
+      <p class="help">Only needed if your key is lost or compromised. After creating a new key, its public key must be added to <code>app/lib/License.php</code> (PUBLIC_KEYS) and the update installed on client sites <em>before</em> licenses signed with it will be accepted.</p>
+      <button class="btn secondary sm" id="newkey" type="button">Create new signing key…</button>
+      <div id="newkeyout" class="help"></div>
+    </details>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>2. Issue a license</h2>
+      <label for="licensee">Licensee (client company name)</label>
+      <input id="licensee" placeholder="e.g. Cityland Development Corporation">
+      <label for="domains">Licensed domain(s)</label>
+      <textarea id="domains" rows="2" placeholder="bidding.cityland.com.ph&#10;*.cityland.com.ph (wildcard = all subdomains)"></textarea>
+      <div class="help">One per line or comma-separated. "www." is ignored. The domain must match the Site URL of the installation.</div>
+      <div class="row">
+        <div><label for="plan">Plan</label>
+          <select id="plan"><option>Standard</option><option selected>Professional</option><option>Enterprise</option><option>Custom</option></select></div>
+        <div><label for="lid">License ID</label><input id="lid" placeholder="auto"></div>
+      </div>
+      <div class="row">
+        <div><label for="issued">Issued date</label><input type="date" id="issued"></div>
+        <div><label for="expires">Expiry date</label><input type="date" id="expires">
+          <div class="chips"><button type="button" data-add="1">+1 year</button><button type="button" data-add="2">+2 years</button><button type="button" data-add="3">+3 years</button><button type="button" data-days="30">30-day trial</button></div></div>
+      </div>
+      <div class="row3">
+        <div><label for="maxAdmins">Max active admins</label><input type="number" min="0" id="maxAdmins"><div class="help">0 = unlimited</div></div>
+        <div><label for="maxProps">Max active properties</label><input type="number" min="0" id="maxProps"><div class="help">0 = unlimited</div></div>
+        <div><label for="grace">Grace days</label><input type="number" min="0" id="grace" value="7"></div>
+      </div>
+      <label for="notes">Notes (shown on the client's License page)</label>
+      <input id="notes" placeholder="e.g. Annual license — PO 2026-118">
+      <div style="margin-top:16px" class="toolbar"><button class="btn" id="issue" type="button" disabled>Generate license key</button><span class="help" id="loadHint">Load the signing key first.</span></div>
+      <div id="issueStatus"></div>
+      <label>License key</label>
+      <div class="key" id="out">—</div>
+      <div class="toolbar" style="margin-top:8px"><button class="btn secondary sm" id="copy" type="button" disabled>Copy key</button><button class="btn secondary sm" id="dl" type="button" disabled>Download .txt</button></div>
+    </div>
+
+    <div class="card">
+      <h2>3. Check a license</h2>
+      <p class="muted" style="margin-top:0">Paste any license key to decode it and verify the signature against the public key(s) built into the Bidding System.</p>
+      <textarea id="inspectIn" rows="5" placeholder="CLB1-…" style="font-family:Consolas,Menlo,monospace;font-size:.78rem"></textarea>
+      <div class="toolbar" style="margin-top:8px"><button class="btn secondary sm" id="inspect" type="button">Verify &amp; decode</button></div>
+      <div id="inspectOut"></div>
+      <h3 style="margin-top:22px;font-family:Georgia,serif">Plan presets</h3>
+      <table><thead><tr><th>Plan</th><th>Admins</th><th>Active properties</th></tr></thead><tbody>
+        <tr><td>Standard</td><td>5</td><td>25</td></tr><tr><td>Professional</td><td>15</td><td>100</td></tr><tr><td>Enterprise</td><td>Unlimited</td><td>Unlimited</td></tr><tr><td>Custom</td><td colspan="2">Your own values</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar" style="justify-content:space-between"><h2 style="margin:0">4. Issued licenses register</h2>
+      <div class="toolbar"><button class="btn secondary sm" id="exportCsv" type="button">Export CSV</button><label class="btn secondary sm" style="margin:0">Import CSV<input type="file" id="importCsv" accept=".csv" hidden></label><button class="btn secondary sm" id="clearReg" type="button">Clear</button></div></div>
+    <p class="help">Saved in this browser only (localStorage). Export the CSV regularly and keep it with your signing key backup.</p>
+    <div style="overflow-x:auto"><table><thead><tr><th>License ID</th><th>Licensee</th><th>Domains</th><th>Plan</th><th>Expires</th><th>Status</th><th>Limits</th><th></th></tr></thead><tbody id="reg"></tbody></table></div>
+  </div>
+</main>
+<script>
+(function () {
+  'use strict';
+  // Public key(s) trusted by the Bidding System (must match app/lib/License.php PUBLIC_KEYS).
+  var PUBLIC_KEYS = ['+taBcfFKa3Uk6PGZzBxSwyPa5UupdbMpVwa57ifs5X0='];
+  var PKCS8_PREFIX = new Uint8Array([0x30,0x2e,0x02,0x01,0x00,0x30,0x05,0x06,0x03,0x2b,0x65,0x70,0x04,0x22,0x04,0x20]);
+  var PRESETS = { Standard: [5, 25], Professional: [15, 100], Enterprise: [0, 0] };
+  var REG_KEY = 'cityland_bidding_license_register';
+  var $ = function (id) { return document.getElementById(id); };
+  var signKey = null, keyInfo = null, lastLicense = null;
+
+  function b64ToBytes(b64) { var s = atob(b64), a = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; }
+  function bytesToB64(bytes) { var s = ''; bytes = new Uint8Array(bytes); for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); }
+  function b64url(bytes) { return bytesToB64(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function b64urlToBytes(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return b64ToBytes(s); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function iso(d) { return d.toISOString().slice(0, 10); }
+  function msg(el, cls, text) { el.innerHTML = '<div class="status ' + cls + '">' + esc(text) + '</div>'; }
+
+  // ---- capability check
+  crypto.subtle.generateKey({ name: 'Ed25519' }, false, ['sign']).catch(function () {
+    var s = $('support'); s.hidden = false;
+    s.textContent = 'This browser does not support Ed25519 signing. Please use the latest Chrome, Edge, Firefox or Safari — or the command-line generator (license-tools/generate.php).';
+  });
+
+  // ---- defaults
+  var today = new Date(); $('issued').value = iso(today);
+  var next = new Date(today); next.setFullYear(next.getFullYear() + 1); $('expires').value = iso(next);
+  function applyPreset() { var p = PRESETS[$('plan').value]; if (p) { $('maxAdmins').value = p[0]; $('maxProps').value = p[1]; } }
+  $('plan').addEventListener('change', applyPreset); applyPreset();
+  document.querySelectorAll('[data-add]').forEach(function (b) { b.addEventListener('click', function () { var d = new Date($('issued').value || iso(new Date())); d.setFullYear(d.getFullYear() + parseInt(b.dataset.add, 10)); $('expires').value = iso(d); }); });
+  document.querySelectorAll('[data-days]').forEach(function (b) { b.addEventListener('click', function () { var d = new Date($('issued').value || iso(new Date())); d.setDate(d.getDate() + parseInt(b.dataset.days, 10)); $('expires').value = iso(d); $('grace').value = 0; }); });
+
+  // ---- load signing key
+  $('keyfile').addEventListener('change', function (e) {
+    var f = e.target.files[0]; if (!f) return;
+    f.text().then(function (txt) {
+      var k = JSON.parse(txt);
+      if (k.type !== 'cityland-bidding-license-signing-key' || !k.seed) throw new Error('Not a Cityland Bidding signing key file.');
+      var seed = b64ToBytes(k.seed); if (seed.length !== 32) throw new Error('Invalid key seed.');
+      var pkcs8 = new Uint8Array(48); pkcs8.set(PKCS8_PREFIX); pkcs8.set(seed, 16);
+      return crypto.subtle.importKey('pkcs8', pkcs8, { name: 'Ed25519' }, false, ['sign']).then(function (key) {
+        signKey = key; keyInfo = k;
+        var trusted = PUBLIC_KEYS.indexOf(k.public) !== -1;
+        $('keystatus').innerHTML = '<span class="badge ' + (trusted ? 'b-green' : 'b-amber') + '">' + (trusted ? 'Key loaded' : 'Key loaded — not yet trusted') + '</span> <span class="muted">ID ' + esc(k.key_id || '') + '</span>' +
+          (trusted ? '' : ' <span class="help">This key is not in the built-in PUBLIC_KEYS; client sites will reject its licenses until updated.</span>');
+        $('issue').disabled = false; $('loadHint').hidden = true;
+      });
+    }).catch(function (err) { signKey = null; $('issue').disabled = true; $('keystatus').innerHTML = '<span class="badge b-red">' + esc(err.message || 'Could not load key') + '</span>'; });
+  });
+
+  // ---- create new key (rotation)
+  $('newkey').addEventListener('click', function () {
+    if (!confirm('Create a NEW signing key? Licenses signed with it only work after its public key is added to the Bidding System code.')) return;
+    crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']).then(function (kp) {
+      return Promise.all([crypto.subtle.exportKey('pkcs8', kp.privateKey), crypto.subtle.exportKey('raw', kp.publicKey)]);
+    }).then(function (r) {
+      var seed = new Uint8Array(r[0]).slice(16), pub = bytesToB64(r[1]);
+      return crypto.subtle.digest('SHA-256', new TextEncoder().encode(pub)).then(function (h) {
+        var kid = Array.from(new Uint8Array(h)).map(function (x) { return ('0' + x.toString(16)).slice(-2); }).join('').slice(0, 12);
+        var json = JSON.stringify({ type: 'cityland-bidding-license-signing-key', version: 1, created: new Date().toISOString(), key_id: kid, seed: bytesToB64(seed), public: pub,
+          warning: 'PRIVATE SIGNING KEY. Keep offline and backed up. Anyone with this file can create Cityland Bidding licenses. Never upload it to a server or commit it to Git.' }, null, 2);
+        var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' })); a.download = 'cityland-license-signing-key-' + kid + '.json'; a.click();
+        $('newkeyout').innerHTML = 'Downloaded. Public key to add to <code>PUBLIC_KEYS</code>:<br><code>' + esc(pub) + '</code>';
+      });
+    }).catch(function (e) { $('newkeyout').textContent = 'Failed: ' + e.message; });
+  });
+
+  // ---- issue
+  $('issue').addEventListener('click', function () {
+    var st = $('issueStatus');
+    var domains = $('domains').value.split(/[\s,;]+/).map(function (d) { return d.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, ''); }).filter(Boolean);
+    if (!$('licensee').value.trim() || !domains.length || !$('expires').value) { msg(st, 'err', 'Licensee, at least one domain and an expiry date are required.'); return; }
+    if ($('expires').value <= $('issued').value) { msg(st, 'err', 'The expiry date must be after the issue date.'); return; }
+    var rnd = Array.from(crypto.getRandomValues(new Uint8Array(3))).map(function (x) { return ('0' + x.toString(16)).slice(-2); }).join('').toUpperCase();
+    var payload = {
+      v: 1, product: 'cityland-bidding', lid: $('lid').value.trim() || ('CLB-' + $('issued').value.slice(0, 4) + '-' + rnd),
+      licensee: $('licensee').value.trim(), domains: domains, plan: $('plan').value,
+      issued: $('issued').value, expires: $('expires').value, grace_days: parseInt($('grace').value || '0', 10),
+      max_admins: parseInt($('maxAdmins').value || '0', 10), max_properties: parseInt($('maxProps').value || '0', 10), notes: $('notes').value.trim()
+    };
+    var bytes = new TextEncoder().encode(JSON.stringify(payload));
+    crypto.subtle.sign({ name: 'Ed25519' }, signKey, bytes).then(function (sig) {
+      lastLicense = { key: 'CLB1-' + b64url(bytes) + '.' + b64url(sig), payload: payload };
+      $('out').textContent = lastLicense.key;
+      $('copy').disabled = $('dl').disabled = false;
+      msg(st, 'ok', 'License ' + payload.lid + ' generated for ' + payload.licensee + ' — valid until ' + payload.expires + '. Added to the register below.');
+      var reg = loadReg(); reg.unshift({ at: new Date().toISOString(), key: lastLicense.key, p: payload }); saveReg(reg); renderReg();
+      $('lid').value = '';
+    }).catch(function (e) { msg(st, 'err', 'Signing failed: ' + e.message); });
+  });
+  $('copy').addEventListener('click', function () { navigator.clipboard.writeText(lastLicense.key).then(function () { $('copy').textContent = 'Copied ✓'; setTimeout(function () { $('copy').textContent = 'Copy key'; }, 1500); }); });
+  $('dl').addEventListener('click', function () {
+    var p = lastLicense.payload;
+    var txt = 'Cityland Online Property Bidding — License Key\n\nLicense ID: ' + p.lid + '\nLicensee: ' + p.licensee + '\nDomain(s): ' + p.domains.join(', ') + '\nPlan: ' + p.plan + '\nValid until: ' + p.expires +
+      '\n\nInstall: sign in as Super Admin → License → paste the key below → Verify & install license.\n\n' + lastLicense.key + '\n';
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain' })); a.download = p.lid + '.txt'; a.click();
+  });
+
+  // ---- inspect / verify
+  function verify(key) {
+    key = key.replace(/\s+/g, '');
+    if (key.indexOf('CLB1-') !== 0 || key.split('.').length !== 2) return Promise.reject(new Error('Not a CLB1 license key.'));
+    var parts = key.slice(5).split('.'), data = b64urlToBytes(parts[0]), sig = b64urlToBytes(parts[1]);
+    var payload = JSON.parse(new TextDecoder().decode(data));
+    var keys = PUBLIC_KEYS.slice(); if (keyInfo && keys.indexOf(keyInfo.public) === -1) keys.push(keyInfo.public);
+    return Promise.all(keys.map(function (pub) {
+      return crypto.subtle.importKey('raw', b64ToBytes(pub), { name: 'Ed25519' }, false, ['verify']).then(function (k) { return crypto.subtle.verify({ name: 'Ed25519' }, k, sig, data); });
+    })).then(function (res) { return { payload: payload, valid: res.indexOf(true) !== -1 }; });
+  }
+  $('inspect').addEventListener('click', function () {
+    var out = $('inspectOut');
+    verify($('inspectIn').value).then(function (r) {
+      out.innerHTML = '<div class="status ' + (r.valid ? 'ok' : 'err') + '">' + (r.valid ? 'Signature VALID — genuine license.' : 'Signature NOT valid — the key was altered or signed with an unknown key.') + '</div>' +
+        '<pre class="payload">' + esc(JSON.stringify(r.payload, null, 2)) + '</pre>';
+    }).catch(function (e) { msg(out, 'err', e.message); });
+  });
+
+  // ---- register
+  function loadReg() { try { return JSON.parse(localStorage.getItem(REG_KEY) || '[]'); } catch (e) { return []; } }
+  function saveReg(r) { try { localStorage.setItem(REG_KEY, JSON.stringify(r)); } catch (e) {} }
+  function renderReg() {
+    var reg = loadReg(), tb = $('reg'); tb.innerHTML = '';
+    if (!reg.length) { tb.innerHTML = '<tr><td colspan="8" class="muted">No licenses issued in this browser yet.</td></tr>'; return; }
+    var now = iso(new Date());
+    reg.forEach(function (r, i) {
+      var p = r.p, days = Math.round((new Date(p.expires) - new Date(now)) / 86400000);
+      var st = days < 0 ? '<span class="badge b-red">Expired</span>' : days <= 30 ? '<span class="badge b-amber">' + days + ' days left</span>' : '<span class="badge b-green">Active</span>';
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><strong>' + esc(p.lid) + '</strong><br><span class="help">' + esc((r.at || '').slice(0, 10)) + '</span></td><td>' + esc(p.licensee) + '</td><td>' + esc(p.domains.join(', ')) + '</td><td>' + esc(p.plan) +
+        '</td><td>' + esc(p.expires) + '</td><td>' + st + '</td><td class="help">Admins: ' + (p.max_admins || '∞') + '<br>Properties: ' + (p.max_properties || '∞') + '</td><td><button class="btn secondary sm" data-copy="' + i + '">Copy key</button> <button class="btn secondary sm" data-renew="' + i + '">Renew</button></td>';
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll('[data-copy]').forEach(function (b) { b.addEventListener('click', function () { navigator.clipboard.writeText(loadReg()[b.dataset.copy].key); b.textContent = 'Copied ✓'; }); });
+    tb.querySelectorAll('[data-renew]').forEach(function (b) { b.addEventListener('click', function () {
+      var p = loadReg()[b.dataset.renew].p;
+      $('licensee').value = p.licensee; $('domains').value = p.domains.join('\n'); $('plan').value = p.plan; $('maxAdmins').value = p.max_admins; $('maxProps').value = p.max_properties;
+      $('grace').value = p.grace_days; $('notes').value = 'Renewal of ' + p.lid; $('issued').value = iso(new Date());
+      var start = new Date(p.expires > iso(new Date()) ? p.expires : iso(new Date())); start.setFullYear(start.getFullYear() + 1); $('expires').value = iso(start);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }); });
+  }
+  function csvCell(v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  $('exportCsv').addEventListener('click', function () {
+    var rows = [['issued_at', 'lid', 'licensee', 'domains', 'plan', 'issued', 'expires', 'grace_days', 'max_admins', 'max_properties', 'notes', 'license_key']];
+    loadReg().forEach(function (r) { var p = r.p; rows.push([r.at, p.lid, p.licensee, p.domains.join(' '), p.plan, p.issued, p.expires, p.grace_days, p.max_admins, p.max_properties, p.notes, r.key]); });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(function (r) { return r.map(csvCell).join(','); }).join('\n')], { type: 'text/csv' }));
+    a.download = 'issued-licenses-' + iso(new Date()) + '.csv'; a.click();
+  });
+  $('importCsv').addEventListener('change', function (e) {
+    var f = e.target.files[0]; if (!f) return;
+    f.text().then(function (txt) {
+      var lines = txt.split(/\r?\n/).filter(Boolean).slice(1), reg = loadReg(), known = reg.map(function (r) { return r.key; }), added = 0;
+      var jobs = lines.map(function (line) {
+        var m = line.match(/(CLB1-[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+)/); if (!m || known.indexOf(m[1]) !== -1) return Promise.resolve();
+        var at = (line.split(',')[0] || '').replace(/"/g, '');
+        return verify(m[1]).then(function (r) { reg.push({ at: at || new Date().toISOString(), key: m[1], p: r.payload }); known.push(m[1]); added++; }).catch(function () {});
+      });
+      return Promise.all(jobs).then(function () { reg.sort(function (a, b) { return (b.at || '').localeCompare(a.at || ''); }); saveReg(reg); renderReg(); alert(added + ' license(s) imported.'); });
+    });
+  });
+  $('clearReg').addEventListener('click', function () { if (confirm('Clear the register in this browser? Export a CSV first.')) { saveReg([]); renderReg(); } });
+  renderReg();
+})();
+</script>
+</body>
+</html>

@@ -19,6 +19,9 @@ if (is_post()) {
             if ($err = Security::passwordError($pw)) {
                 throw new RuntimeException($err);
             }
+            if ($limitErr = License::checkLimit('admins')) {
+                throw new RuntimeException($limitErr);
+            }
             if (DB::val('SELECT 1 FROM admins WHERE email = ?', [$email])) {
                 throw new RuntimeException('An administrator with this email already exists.');
             }
@@ -39,6 +42,9 @@ if (is_post()) {
             }
             if (!isset(Rbac::ROLES[$role])) {
                 throw new RuntimeException('Invalid role.');
+            }
+            if ($active && !(int) $t['is_active'] && ($limitErr = License::checkLimit('admins'))) {
+                throw new RuntimeException($limitErr);
             }
             $new = ['role' => $role, 'is_active' => $active, 'updated_at' => now()];
             if (!empty($_POST['reset_2fa'])) {

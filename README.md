@@ -41,6 +41,7 @@ UAT checklist are in **[docs/TESTING.md](docs/TESTING.md)**.
 | [docs/USER_GUIDE.md](docs/USER_GUIDE.md) | Basic guide for bidders |
 | [docs/BACKUP_RESTORE.md](docs/BACKUP_RESTORE.md) | Backup and restore procedure |
 | [docs/SECURITY.md](docs/SECURITY.md) | Security, integrity and data-privacy design |
+| [docs/LICENSING.md](docs/LICENSING.md) | License keys, expiry/grace/lock rules, plan limits, license generator |
 
 ## Quick start (cPanel)
 
@@ -67,5 +68,6 @@ cron.php                                   Scheduled tasks (closing, reminders, 
 install.php                                Web installer (delete after use)
 dev/mailbox.php, admin/testtools.php       Test-mode only (return 404 on the live site)
 docker/, docker-compose.yml, tests/        Local test environment and automated tests (not needed on cPanel)
+license-tools/                             Vendor license generator (not shipped to clients)
 docs/                                      Documentation
 ```

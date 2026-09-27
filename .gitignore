@@ -8,3 +8,6 @@ storage/installed.lock
 !storage/backups/.gitkeep
 !storage/logs/.gitkeep
 .DS_Store
+# Never commit license signing keys or the issued-licenses register
+*signing-key*.json
+issued-licenses*.csv
