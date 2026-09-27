@@ -20,21 +20,23 @@ if (is_testing()) {
 $current = basename($_SERVER['SCRIPT_NAME'] ?? '');
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
 <meta name="csrf-token" content="<?= e(Csrf::token()) ?>">
 <title><?= e($pageTitle) ?> · Admin · <?= e(setting('company_name', 'Cityland')) ?></title>
-<link rel="icon" href="<?= e(asset('img/favicon.svg')) ?>" type="image/svg+xml">
+<link rel="icon" href="<?= e(asset('img/favicon-64.png')) ?>" type="image/png">
+<script src="<?= e(asset('js/theme.js')) ?>"></script>
 <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
 </head>
-<body class="admin" data-base="<?= e(base_url()) ?>">
+<body class="admin" data-base="<?= e(base_url()) ?>" data-feed="<?= e(url('admin/notifications_feed.php')) ?>" data-notif-page="<?= e(url('admin/notifications.php')) ?>">
 <?php if (is_testing()): ?><div class="test-banner" role="note"><strong>TEST ENVIRONMENT</strong> — not the live system. <a href="<?= e(url('dev/mailbox.php')) ?>">Test mailbox</a><?php if (can('settings.manage')): ?> · <a href="<?= e(url('admin/testtools.php')) ?>">Test tools</a><?php endif; ?></div><?php endif; ?>
 <div class="admin-shell">
   <aside class="admin-sidebar" id="admin-sidebar">
-    <a class="admin-brand" href="<?= e(url('admin/')) ?>"><img src="<?= e(asset('img/logo.svg')) ?>" alt="" width="32" height="32"> <span><?= e(setting('company_name', 'Cityland')) ?><small>Bidding Admin</small></span></a>
+    <a class="admin-brand" href="<?= e(url('admin/')) ?>"><span class="logo-chip"><img src="<?= e(asset('img/logo.png')) ?>" alt="" width="40" height="40"></span><span><strong><?= e(setting('company_name', 'Cityland')) ?></strong><small>Bidding Admin</small></span></a>
     <nav aria-label="Admin">
       <?php foreach ($nav as [$file, $label, $perm]): if (!can($perm)) continue; ?>
         <a href="<?= e(url('admin/' . $file)) ?>" class="<?= $current === $file ? 'active' : '' ?>"><?= e($label) ?>
@@ -48,7 +50,8 @@ $current = basename($_SERVER['SCRIPT_NAME'] ?? '');
       <button class="nav-toggle dark" type="button" aria-controls="admin-sidebar" aria-expanded="false" aria-label="Toggle menu"><span></span><span></span><span></span></button>
       <h1 class="admin-title"><?= e($pageTitle) ?></h1>
       <div class="admin-user">
-        <a href="<?= e(url('admin/notifications.php')) ?>" class="topbar-link">Notifications<?php if ($unread): ?> <span class="count-pill"><?= (int) $unread ?></span><?php endif; ?></a>
+        <button class="icon-btn on-light" type="button" data-theme-toggle aria-label="Switch between light and dark mode" title="Light / dark mode"><span class="theme-icon-light"><?= icon('moon') ?></span><span class="theme-icon-dark"><?= icon('sun') ?></span></button>
+        <?php require APP_DIR . '/views/bell.php'; ?>
         <a href="<?= e(url('admin/account.php')) ?>" class="topbar-link"><?= e($admin['name'] ?? '') ?> <small class="muted">(<?= e(Rbac::label($admin['role'] ?? '')) ?>)</small></a>
         <form method="post" action="<?= e(url('admin/logout.php')) ?>" class="inline-form"><?= Csrf::field() ?><button class="btn btn-sm btn-outline" type="submit">Sign out</button></form>
       </div>

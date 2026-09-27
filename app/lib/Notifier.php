@@ -50,6 +50,35 @@ final class Notifier
         }
     }
 
+    /**
+     * JSON feed for the notification bell (GET), and mark-as-read actions (POST: action=read_all | read, id).
+     */
+    public static function feedResponse(string $type, int $id): never
+    {
+        if (is_post()) {
+            Csrf::verify();
+            if (input('action') === 'read_all') {
+                DB::run('UPDATE notifications SET is_read = 1 WHERE recipient_type = ? AND recipient_id = ? AND is_read = 0', [$type, $id]);
+            } elseif (input('action') === 'read') {
+                DB::run('UPDATE notifications SET is_read = 1 WHERE recipient_type = ? AND recipient_id = ? AND id = ?', [$type, $id, input_int('id')]);
+            }
+        }
+        $rows = DB::all('SELECT id, title, body, link, is_read, created_at FROM notifications WHERE recipient_type = ? AND recipient_id = ? ORDER BY id DESC LIMIT 10', [$type, $id]);
+        json_response([
+            'ok' => true,
+            'unread' => self::unreadCount($type, $id),
+            'latest_id' => (int) (DB::val('SELECT MAX(id) FROM notifications WHERE recipient_type = ? AND recipient_id = ?', [$type, $id]) ?? 0),
+            'items' => array_map(static fn($r) => [
+                'id' => (int) $r['id'],
+                'title' => $r['title'],
+                'body' => mb_substr((string) $r['body'], 0, 180),
+                'link' => $r['link'] ? url($r['link']) : null,
+                'read' => (bool) $r['is_read'],
+                'time' => fmt_dt($r['created_at'], 'M j, g:i A'),
+            ], $rows),
+        ]);
+    }
+
     public static function unreadCount(string $type, int $id): int
     {
         return (int) DB::val('SELECT COUNT(*) FROM notifications WHERE recipient_type = ? AND recipient_id = ? AND is_read = 0', [$type, $id]);
@@ -62,13 +91,13 @@ final class Notifier
         foreach ($paragraphs as $p) {
             $body .= is_array($p) ? $p['html'] : '<p style="margin:0 0 14px;line-height:1.55">' . nl2br(e($p)) . '</p>';
         }
-        $btn = $link ? '<p style="margin:22px 0"><a href="' . e($link) . '" style="background:#0b2e59;color:#fff;text-decoration:none;padding:12px 22px;border-radius:6px;display:inline-block;font-weight:bold">' . e($linkLabel) . '</a></p>' : '';
-        $contact = e(setting('contact_email', '')) . ' · ' . e(setting('contact_phone', ''));
-        return '<!doctype html><html><body style="margin:0;background:#f3f5f9;font-family:Segoe UI,Arial,sans-serif;color:#1f2937">'
-            . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f5f9;padding:24px 0"><tr><td align="center">'
+        $btn = $link ? '<p style="margin:22px 0"><a href="' . e($link) . '" style="background:#3e7d25;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;display:inline-block;font-weight:bold">' . e($linkLabel) . '</a></p>' : '';
+        $contact = e(setting('contact_email', '')) . ' · ' . e(setting('contact_phone', '')) . '<br>' . e(setting('contact_address', ''));
+        return '<!doctype html><html><body style="margin:0;background:#f4f5f1;font-family:Segoe UI,Arial,sans-serif;color:#1f2937">'
+            . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5f1;padding:24px 0"><tr><td align="center">'
             . '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb">'
-            . '<tr><td style="background:#0b2e59;padding:18px 26px;color:#fff;font-size:18px;font-weight:bold">' . $site . '<div style="height:3px;width:48px;background:#c9a227;margin-top:8px"></div></td></tr>'
-            . '<tr><td style="padding:26px"><h2 style="margin:0 0 16px;font-size:20px;color:#0b2e59">' . e($title) . '</h2>'
+            . '<tr><td style="background:#101512;padding:18px 26px;color:#fff;border-bottom:3px solid #3e7d25"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:#fff;border-radius:50%;width:44px;height:44px;text-align:center;vertical-align:middle"><img src="' . e(url('assets/img/logo.png')) . '" width="38" height="38" alt="Cityland" style="display:block;margin:3px auto"></td><td style="padding-left:12px;font-family:Georgia,serif;font-size:19px;font-weight:bold;letter-spacing:3px;color:#ffffff">' . e(mb_strtoupper(setting('company_name', 'Cityland'))) . '<div style="font-family:Segoe UI,Arial,sans-serif;font-size:10px;letter-spacing:3px;color:#8fcf6f;font-weight:600;margin-top:3px">ONLINE PROPERTY BIDDING</div></td></tr></table></td></tr>'
+            . '<tr><td style="padding:26px"><h2 style="margin:0 0 16px;font-size:21px;color:#111612;font-family:Georgia,serif">' . e($title) . '</h2>'
             . '<p style="margin:0 0 14px">' . e($greeting) . '</p>' . $body . $btn
             . '<p style="margin:24px 0 0;font-size:12px;color:#6b7280">This is an automated message from the Cityland Online Property Bidding System. Please do not reply directly to this email. For concerns contact ' . $contact . '.</p>'
             . '</td></tr></table></td></tr></table></body></html>';

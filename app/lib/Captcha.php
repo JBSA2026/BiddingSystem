@@ -81,19 +81,19 @@ final class Captcha
         if (!function_exists('imagecreatetruecolor')) {
             // GD unavailable: fall back to an SVG with noise.
             header('Content-Type: image/svg+xml');
-            $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="56"><rect width="100%" height="100%" fill="#eef2f7"/>';
+            $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="56"><rect width="100%" height="100%" fill="#eef1ec"/>';
             for ($i = 0; $i < 8; $i++) {
-                $svg .= sprintf('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="#9fb0c7" stroke-width="1"/>', random_int(0, 180), random_int(0, 56), random_int(0, 180), random_int(0, 56));
+                $svg .= sprintf('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="#a9b8a3" stroke-width="1"/>', random_int(0, 180), random_int(0, 56), random_int(0, 180), random_int(0, 56));
             }
             foreach (str_split($code) as $i => $ch) {
-                $svg .= sprintf('<text x="%d" y="%d" font-family="monospace" font-size="30" font-weight="bold" fill="#0b2e59" transform="rotate(%d %d 30)">%s</text>', 16 + $i * 32, random_int(34, 44), random_int(-18, 18), 26 + $i * 32, $ch);
+                $svg .= sprintf('<text x="%d" y="%d" font-family="monospace" font-size="30" font-weight="bold" fill="#1d3f10" transform="rotate(%d %d 30)">%s</text>', 16 + $i * 32, random_int(34, 44), random_int(-18, 18), 26 + $i * 32, $ch);
             }
             echo $svg . '</svg>';
             return;
         }
         $w = 180; $h = 56;
         $im = imagecreatetruecolor($w, $h);
-        imagefill($im, 0, 0, imagecolorallocate($im, 238, 242, 247));
+        imagefill($im, 0, 0, imagecolorallocate($im, 238, 241, 236));
         for ($i = 0; $i < 10; $i++) {
             imageline($im, random_int(0, $w), random_int(0, $h), random_int(0, $w), random_int(0, $h), imagecolorallocate($im, random_int(140, 200), random_int(150, 200), random_int(170, 220)));
         }

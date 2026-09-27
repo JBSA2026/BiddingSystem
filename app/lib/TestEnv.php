@@ -95,6 +95,7 @@ final class TestEnv
         $now = now();
 
         foreach (['company_name' => 'Cityland', 'site_name' => 'Cityland Online Property Bidding (TEST)', 'contact_email' => 'bidding@test.local',
+            'contact_address' => 'Cityland Pasong Tamo Tower, Estacion St., Makati City, 1230 Metro Manila', 'contact_phone' => '(02) 8843 2704', 'dpo_phone' => '(02) 8843 2704',
             'bid_security_enabled' => '1', 'require_admin_approval' => '1', 'require_docs_approved' => '1', 'dual_auth_award' => '1', 'dual_auth_schedule' => '1',
             'payment_instructions' => "TEST ONLY — do not send real money.\nBank: Sample Bank, Account name: Cityland Development Corp. (TEST), Account no. 0000-0000-00\nGCash/Maya: 0917 000 0000 (TEST)"] as $k => $v) {
             Settings::set($k, $v);
@@ -148,7 +149,7 @@ final class TestEnv
         $types = array_column(DB::all('SELECT id, name FROM property_types'), 'id', 'name');
         $mk = static function (array $d) use ($types, $admins, $now): int {
             $d += ['city' => 'Makati', 'min_increment' => 50000, 'status' => 'open', 'is_published' => 1, 'bid_mode' => 'multiple', 'higher_only' => 1,
-                'contact_info' => "Cityland Bidding Team (TEST)\nbidding@test.local\n+63 2 0000 0000",
+                'contact_info' => "Cityland Bidding Team (TEST)\nCityland Pasong Tamo Tower, Estacion St., Makati City, 1230 Metro Manila\n(02) 8843 2704 · bidding@test.local",
                 'terms' => '<p>TEST TERMS. The property is sold on an "as-is, where-is" basis. The winning bidder shall pay 10% of the bid price within five (5) banking days from receipt of the notice of award, and the balance per the approved payment schedule.</p>',
                 'created_by' => $admins['bidding_admin'], 'created_at' => $now];
             $d['property_type_id'] = $types[$d['type']];
@@ -187,7 +188,7 @@ final class TestEnv
             'starting_price' => 780000, 'min_increment' => 0, 'opening_at' => $at('+3 days'), 'closing_at' => $at('+10 days'), 'status' => 'upcoming', 'is_published' => 0]);
 
         // photos + documents
-        $palette = [[11, 46, 89], [18, 63, 120], [120, 90, 30], [30, 90, 70], [90, 40, 80], [60, 60, 70], [40, 80, 110], [100, 70, 40]];
+        $palette = [[24, 52, 20], [62, 125, 37], [34, 40, 36], [44, 95, 24], [70, 78, 72], [30, 70, 45], [52, 60, 54], [40, 88, 30]];
         $n = 0;
         foreach ($p as $key => $pid) {
             $name = (string) DB::val('SELECT name FROM properties WHERE id = ?', [$pid]);
@@ -282,8 +283,8 @@ final class TestEnv
             $f = $y / $h;
             imageline($im, 0, $y, $w, $y, imagecolorallocate($im, (int) ($rgb[0] + (200 - $rgb[0]) * $f * 0.5), (int) ($rgb[1] + (200 - $rgb[1]) * $f * 0.5), (int) ($rgb[2] + (220 - $rgb[2]) * $f * 0.5)));
         }
-        $gold = imagecolorallocate($im, 201, 162, 39);
-        $dark = imagecolorallocatealpha($im, 7, 31, 61, 30);
+        $gold = imagecolorallocate($im, 143, 207, 111);
+        $dark = imagecolorallocatealpha($im, 16, 21, 18, 30);
         $win = imagecolorallocate($im, 245, 222, 140);
         foreach ([[120, 330, 260], [300, 170, 220], [480, 260, 200], [700, 120, 240], [960, 300, 150]] as [$x, $top, $bw]) {
             imagefilledrectangle($im, $x, $top, $x + $bw, 640, $dark);
@@ -295,7 +296,7 @@ final class TestEnv
                 }
             }
         }
-        imagefilledrectangle($im, 0, 640, $w, $h, imagecolorallocate($im, 7, 31, 61));
+        imagefilledrectangle($im, 0, 640, $w, $h, imagecolorallocate($im, 16, 21, 18));
         imagefilledrectangle($im, 40, 668, 110, 672, $gold);
         $white = imagecolorallocate($im, 255, 255, 255);
         imagestring($im, 5, 40, 684, mb_substr(preg_replace('/[^\x20-\x7E]/', '-', $title) ?? '', 0, 120), $white);

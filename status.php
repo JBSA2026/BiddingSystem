@@ -1,6 +1,7 @@
 <?php
 /** Lightweight JSON endpoint for countdown re-sync (server time). Never exposes bidder identities. */
 declare(strict_types=1);
+define('NO_SESSION_TOUCH', true);
 require __DIR__ . '/app/bootstrap.php';
 
 $p = Bidding::property(query_int('id'));

@@ -202,6 +202,155 @@
     el.innerHTML = qr.createSvgTag(cell, cell * 2);
   });
 
+
+  // ---------------------------------------------------------------- light / dark mode
+  $all('[data-theme-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('cl_theme', next); } catch (e) {}
+    });
+  });
+
+  // ---------------------------------------------------------------- notification sound (Web Audio, no files)
+  var audioCtx = null;
+  function soundOn() { try { return localStorage.getItem('cl_sound') !== 'off'; } catch (e) { return true; } }
+  function unlockAudio() {
+    if (audioCtx || !(window.AudioContext || window.webkitAudioContext)) return;
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audioCtx = null; }
+  }
+  ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) { window.addEventListener(ev, unlockAudio, { once: true, passive: true }); });
+  function chime() {
+    if (!soundOn() || !audioCtx) return;
+    try {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      var t = audioCtx.currentTime;
+      [[880, 0], [1318.5, 0.13]].forEach(function (n) {
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = 'sine'; o.frequency.value = n[0];
+        g.gain.setValueAtTime(0.0001, t + n[1]);
+        g.gain.exponentialRampToValueAtTime(0.18, t + n[1] + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + n[1] + 0.55);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t + n[1]); o.stop(t + n[1] + 0.6);
+      });
+    } catch (e) {}
+  }
+
+  // ---------------------------------------------------------------- toasts
+  var toastStack = $('[data-toasts]');
+  var bellSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
+  function toast(title, body, link) {
+    if (!toastStack) return;
+    var el = document.createElement('div');
+    el.className = 'toast';
+    el.setAttribute('role', 'status');
+    var icon = document.createElement('div'); icon.className = 't-icon'; icon.innerHTML = bellSvg;
+    var wrap = document.createElement(link ? 'a' : 'div');
+    if (link) wrap.href = link;
+    var t = document.createElement('div'); t.className = 't-title'; t.textContent = title;
+    var b = document.createElement('div'); b.className = 't-body'; b.textContent = body || '';
+    wrap.appendChild(t); wrap.appendChild(b);
+    el.appendChild(icon); el.appendChild(wrap);
+    toastStack.appendChild(el);
+    setTimeout(function () { el.classList.add('leaving'); setTimeout(function () { el.remove(); }, 320); }, 7000);
+  }
+
+  // ---------------------------------------------------------------- notification bell (live feed)
+  var feedUrl = document.body.getAttribute('data-feed');
+  var bellWrap = $('[data-notif]');
+  if (feedUrl && bellWrap) {
+    var csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+    var btn = $('[data-notif-toggle]', bellWrap), panel = $('[data-notif-panel]', bellWrap);
+    var list = $('[data-notif-list]', bellWrap), countEl = $('[data-notif-count]', bellWrap);
+    var storeKey = 'cl_notif_last:' + feedUrl, stopped = false, timer = null;
+    var soundBtn = $('[data-sound-toggle]', bellWrap);
+
+    function setCount(n) {
+      if (!countEl) return;
+      countEl.textContent = n > 99 ? '99+' : String(n);
+      countEl.hidden = !n;
+      btn.setAttribute('aria-label', 'Notifications' + (n ? ' (' + n + ' unread)' : ''));
+    }
+    function render(items) {
+      list.innerHTML = '';
+      if (!items.length) { var e = document.createElement('div'); e.className = 'notif-empty'; e.textContent = 'You have no notifications yet.'; list.appendChild(e); return; }
+      items.forEach(function (it) {
+        var a = document.createElement('a');
+        a.className = 'notif-item' + (it.read ? '' : ' unread');
+        a.href = it.link || document.body.getAttribute('data-notif-page') || '#';
+        var t = document.createElement('div'); t.className = 'ni-title'; t.textContent = it.title;
+        var b = document.createElement('div'); b.className = 'ni-body'; b.textContent = it.body || '';
+        var d = document.createElement('div'); d.className = 'ni-time'; d.textContent = it.time;
+        a.appendChild(t); a.appendChild(b); a.appendChild(d);
+        a.addEventListener('click', function () {
+          if (!it.read) post({ action: 'read', id: it.id }, true);
+        });
+        list.appendChild(a);
+      });
+    }
+    function handle(d, silent) {
+      if (!d || !d.ok) return;
+      setCount(d.unread);
+      render(d.items || []);
+      var last = null;
+      try { last = parseInt(localStorage.getItem(storeKey) || '', 10); } catch (e) {}
+      if (!isNaN(last) && last !== null && d.latest_id > last && !silent) {
+        var fresh = (d.items || []).filter(function (it) { return it.id > last && !it.read; }).reverse();
+        fresh.slice(-3).forEach(function (it) { toast(it.title, it.body, it.link); });
+        if (fresh.length) {
+          chime();
+          btn.classList.remove('ringing'); void btn.offsetWidth; btn.classList.add('ringing');
+        }
+      }
+      try { localStorage.setItem(storeKey, String(d.latest_id || 0)); } catch (e) {}
+    }
+    function load(silent) {
+      if (stopped) return;
+      fetch(feedUrl, { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' } })
+        .then(function (r) { if (r.status === 401) { stopped = true; return null; } return r.json(); })
+        .then(function (d) { handle(d, silent); })
+        .catch(function () {});
+    }
+    function post(data, keepalive) {
+      var body = new URLSearchParams(data); body.append('_csrf', csrf);
+      return fetch(feedUrl, { method: 'POST', credentials: 'same-origin', body: body, keepalive: !!keepalive, headers: { 'X-CSRF-Token': csrf } })
+        .then(function (r) { return r.json(); }).then(function (d) { handle(d, true); }).catch(function () {});
+    }
+    function schedule() { clearInterval(timer); timer = setInterval(function () { if (!document.hidden) load(false); }, 25000); }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = panel.hidden;
+      panel.hidden = !open;
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) load(true);
+    });
+    document.addEventListener('click', function (e) { if (!panel.hidden && !bellWrap.contains(e.target)) { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); } });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); btn.focus(); } });
+    var readAll = $('[data-notif-readall]', bellWrap);
+    if (readAll) readAll.addEventListener('click', function () { post({ action: 'read_all' }); });
+
+    function paintSound() {
+      if (!soundBtn) return;
+      var on = soundOn();
+      soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      $('[data-sound-on]', soundBtn).hidden = !on;
+      $('[data-sound-off]', soundBtn).hidden = on;
+      $('[data-sound-label]', soundBtn).textContent = on ? 'Sound on' : 'Sound off';
+    }
+    if (soundBtn) soundBtn.addEventListener('click', function () {
+      try { localStorage.setItem('cl_sound', soundOn() ? 'off' : 'on'); } catch (e) {}
+      paintSound();
+      unlockAudio();
+      if (soundOn()) chime();
+    });
+    paintSound();
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) load(false); });
+    load(false);
+    schedule();
+  }
+
   // ---------------------------------------------------------------- misc
   $all('[data-autosubmit]').forEach(function (el) { el.addEventListener('change', function () { el.form.submit(); }); });
   $all('[data-check-all]').forEach(function (m) {

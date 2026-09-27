@@ -43,7 +43,10 @@ final class Session
                 $_SESSION['_flash'][] = ['type' => 'info', 'message' => 'Your session expired due to inactivity. Please sign in again.'];
             }
         }
-        $_SESSION['_last'] = $now;
+        // Background polling (notification feed, countdown sync) must not keep an idle session alive.
+        if (!defined('NO_SESSION_TOUCH')) {
+            $_SESSION['_last'] = $now;
+        }
         $_SESSION['_started'] ??= $now;
     }
 

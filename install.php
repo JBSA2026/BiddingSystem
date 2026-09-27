@@ -183,8 +183,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $requiredOk) {
 }
 ?><!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
-<title>Install · Cityland Online Property Bidding</title><link rel="stylesheet" href="assets/css/app.css"></head>
-<body><header class="site-header"><div class="container header-inner"><span class="brand"><img src="assets/img/logo.svg" alt="" width="40" height="40"><span class="brand-text"><strong>Cityland</strong><small>Installer</small></span></span></div></header>
+<title>Install · Cityland Online Property Bidding</title><link rel="icon" href="assets/img/favicon-64.png" type="image/png"><script src="assets/js/theme.js"></script><link rel="stylesheet" href="assets/css/app.css"></head>
+<body><header class="site-header"><div class="container header-inner"><span class="brand"><span class="logo-chip"><img src="assets/img/logo.png" alt="" width="46" height="46"></span><span class="brand-text"><strong>Cityland</strong><small>Installer</small></span></span></div></header>
 <main class="container medium section">
 <?php if ($done): ?>
   <div class="card"><h1>Installation complete<?= $done['test'] ? ' — TEST environment' : '' ?></h1>

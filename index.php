@@ -62,8 +62,9 @@ View::header('Properties Open for Bidding', ['active' => 'home']);
 ?>
 <section class="hero">
   <div class="container">
-    <h1>Cityland Online Property Bidding</h1>
-    <p>Browse condominium units, parking slots, properties and other assets currently offered for bidding. Register, get verified, and submit your bid securely online — with a transparent, fully audited process.</p>
+    <div class="eyebrow">Cityland Online Property Bidding</div>
+    <h1>Own a piece of the city, <em>one bid at a time.</em></h1>
+    <p>Browse Cityland condominium units, parking slots, properties and other assets open for bidding. Register, get verified and submit your bid securely online, through a transparent and fully audited process.</p>
     <ol class="process" aria-label="Bidding process">
       <li>View Property</li><li>Register</li><li>Verify Account</li><li>Review Terms</li><li>Submit Bid</li><li>Receive Confirmation</li><li>Monitor Status</li><li>Evaluation / Award</li>
     </ol>

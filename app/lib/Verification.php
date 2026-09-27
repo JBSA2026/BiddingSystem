@@ -22,7 +22,7 @@ final class Verification
         ]);
         Notifier::emailOnly($user['email'], $user['full_name'], 'account_verification', 'Verify your email address', [
             'Thank you for registering with the Cityland Online Property Bidding System.',
-            ['html' => '<p style="margin:0 0 6px">Your email verification code is:</p><p style="font-size:30px;font-weight:bold;letter-spacing:8px;color:#0b2e59;margin:0 0 16px">' . e($code) . '</p>'],
+            ['html' => '<p style="margin:0 0 6px">Your email verification code is:</p><p style="font-size:30px;font-weight:bold;letter-spacing:8px;color:#3e7d25;margin:0 0 16px">' . e($code) . '</p>'],
             'You may also click the button below. The code and link expire in ' . self::TTL_MINUTES . ' minutes. If you did not register, please ignore this email.',
         ], url('verify.php?token=' . $token), 'Verify my email');
         Audit::log('verification_email_sent', 'user', $user['id'], null, ['email' => mask_email($user['email'])]);

@@ -12,7 +12,7 @@ View::header('QR Code — ' . $p['ref_no']);
 ?>
 <section class="container narrow section text-center">
   <div class="card">
-    <img src="<?= e(asset('img/logo.svg')) ?>" alt="" width="56" height="56">
+    <img src="<?= e(asset('img/logo.png')) ?>" alt="Cityland" width="72" height="72">
     <h1 class="h2 mt-1"><?= e($p['name']) ?></h1>
     <p class="muted">Reference No. <strong><?= e($p['ref_no']) ?></strong> · <?= e($p['type_name']) ?> · <?= e($p['location']) ?></p>
     <div class="qr-box" data-qr="<?= e($link) ?>" data-size="300"></div>

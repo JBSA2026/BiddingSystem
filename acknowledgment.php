@@ -15,7 +15,7 @@ $ackHtml = static function () use ($bid, $p, $user): string {
     ob_start(); ?>
   <div class="ack">
     <div class="ack-head">
-      <div><strong style="font-size:1.2rem;color:#0b2e59"><?= e(setting('company_name', 'Cityland')) ?></strong><br><span class="muted">Online Property Bidding — Bid Acknowledgment</span></div>
+      <div style="display:flex;align-items:center;gap:12px"><img src="<?= e(asset('img/logo.png')) ?>" alt="" width="54" height="54"><div><strong class="h2" style="font-size:1.35rem;letter-spacing:.12em;text-transform:uppercase"><?= e(setting('company_name', 'Cityland')) ?></strong><br><span class="muted">Online Property Bidding — Bid Acknowledgment</span></div></div>
       <div class="text-right"><div class="muted small">Bid reference</div><div class="big-ref"><?= e($bid['bid_ref']) ?></div></div>
     </div>
     <table class="kv">
