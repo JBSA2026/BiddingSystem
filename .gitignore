@@ -1,0 +1,15 @@
+app/config.php
+storage/uploads/*
+storage/backups/*
+storage/logs/*
+storage/sessions/
+storage/installed.lock
+!storage/uploads/.gitkeep
+!storage/backups/.gitkeep
+!storage/logs/.gitkeep
+.DS_Store
+# Never commit license signing keys or the issued-licenses register
+*signing-key*.json
+issued-licenses*.csv
+cityland-bidding-cpanel.zip
+license-renewal-portal.zip

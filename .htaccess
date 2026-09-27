@@ -1,0 +1,43 @@
+# Cityland Online Property Bidding — Apache / cPanel configuration
+
+Options -Indexes
+DirectoryIndex index.php
+ServerSignature Off
+
+# Block hidden files, docs, SQL, logs, backups and config samples
+<FilesMatch "(^\.|\.(sql|md|log|lock|ini|sh|bak|dist|gz|zip|yml|yaml|bat)$|^Dockerfile$|^(composer\.(json|lock)|package(-lock)?\.json)$)">
+  Require all denied
+</FilesMatch>
+<Files ".htaccess">
+  Require all denied
+</Files>
+
+# Private folders (each also has its own deny-all .htaccess)
+RedirectMatch 404 ^/(.*/)?(app|storage|install|tools|docs|docker|tests|license-tools|license-portal)(/.*)?$
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header unset X-Powered-By
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 30 days"
+  ExpiresByType application/javascript "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+# PHP settings (work on most cPanel servers using mod_php; with PHP-FPM use cPanel > MultiPHP INI Editor)
+<IfModule mod_php.c>
+  php_flag display_errors Off
+  php_flag expose_php Off
+  php_value upload_max_filesize 12M
+  php_value post_max_size 64M
+  php_flag session.cookie_httponly On
+</IfModule>

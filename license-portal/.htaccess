@@ -1,0 +1,6 @@
+# Keep secrets and order data private.
+Options -Indexes
+<FilesMatch "^(config.*\.php|lib\.php|README\.md|.*\.sqlite|.*\.log|.*\.json)$">
+  Require all denied
+</FilesMatch>
+RedirectMatch 404 ^/(.*/)?data(/.*)?$
