@@ -84,7 +84,7 @@ server {
     index index.php;
     client_max_body_size 64M;
 
-    location ~ ^/(app|storage|install|tools|docs|docker|tests|license-tools)(/|$) { deny all; return 404; }
+    location ~ ^/(app|storage|install|tools|docs|docker|tests|license-tools|license-portal)(/|$) { deny all; return 404; }
     location ~ /\.(?!well-known) { deny all; }
     location ~* \.(sql|md|log|lock|gz|zip|yml|yaml|bat)$ { deny all; }
     location = /admin/_init.php { deny all; }

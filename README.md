@@ -69,5 +69,6 @@ install.php                                Web installer (delete after use)
 dev/mailbox.php, admin/testtools.php       Test-mode only (return 404 on the live site)
 docker/, docker-compose.yml, tests/        Local test environment and automated tests (not needed on cPanel)
 license-tools/                             Vendor license generator (not shipped to clients)
+license-portal/                            Vendor-hosted PayMongo renewal portal (not shipped to clients)
 docs/                                      Documentation
 ```

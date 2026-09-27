@@ -96,4 +96,8 @@ return [
         // If behind Cloudflare / a reverse proxy, list trusted proxy IPs so the real client IP is used.
         'trusted_proxies'      => [],
     ],
+    // Online license renewal: the vendor's PayMongo renewal portal. Leave '' to use the built-in default.
+    'license' => [
+        'renew_url' => '',
+    ],
 ];

@@ -48,6 +48,22 @@ In the **TEST environment** (`'env' => 'testing'`), licensing is shown but **not
 
 The server needs the PHP **sodium** extension (cPanel → Select PHP Version → Extensions). The installer checks for it.
 
+## Client: paying online (PayMongo)
+
+When the vendor's renewal portal is set up, **Admin → License** shows a **Pay online & renew** button. The admin-portal
+banner shows a **Renew online** link when the license is expiring or in its grace period. The button is always available,
+including when the portal is locked, so the client can:
+- **renew early**: the new term is added to the current expiry date, so no days are lost;
+- **renew after expiry**, or **subscribe after a trial ends**: the new term starts on the payment date;
+- **upgrade** to a bigger plan.
+
+Payment is by GCash, Maya, GrabPay, QR Ph or credit/debit card through PayMongo. After paying, click
+**Check for my renewed license** on the License page and the new key is downloaded, verified and installed.
+The key is also shown on the payment confirmation page and emailed, so it can be pasted instead.
+
+The site uses `RENEW_URL` in `app/lib/License.php`. You can override it per site with `'license' => ['renew_url' => '…']`
+in `app/config.php`. When it is empty, the page shows the manual renewal instructions instead.
+
 ## Vendor: issuing licenses
 
 The vendor tools are in `license-tools/`. They are **not** included in the cPanel upload ZIP and are blocked from web access.
@@ -67,6 +83,10 @@ php license-tools/generate.php issue --key=/secure/cityland-license-signing-key.
 php license-tools/generate.php inspect "CLB1-…"
 ```
 Each issued key is appended to `issued-licenses.csv` next to the key file.
+
+### Online renewal portal (PayMongo)
+`license-portal/` is a small PHP app that you host on your own domain. It sells renewals, upgrades and new licenses
+through PayMongo Checkout and can issue signed keys automatically. For setup, see [license-portal/README.md](../license-portal/README.md).
 
 ## Protecting the signing key
 

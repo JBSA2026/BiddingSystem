@@ -26,6 +26,7 @@ file_put_contents($cfgFile, '<?php return ' . var_export([
     'captcha' => ['provider' => 'builtin'],
     'security' => ['max_login_attempts' => 5, 'max_ip_attempts' => 20, 'lockout_minutes' => 15, 'session_idle_minutes' => 30, 'session_absolute_hours' => 8,
         'password_min_length' => 10, 'cron_key' => 'e2e', 'trusted_proxies' => []],
+    'license' => ['renew_url' => 'https://license.example.test'],
 ], true) . ';');
 
 $pdo = new PDO("mysql:host={$db['host']};port={$db['port']};charset=utf8mb4", $db['user'], $db['pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);

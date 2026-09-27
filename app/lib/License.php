@@ -30,6 +30,12 @@ final class License
         '+taBcfFKa3Uk6PGZzBxSwyPa5UupdbMpVwa57ifs5X0=',
     ];
 
+    /**
+     * Vendor's online renewal portal (license-portal/, PayMongo). Admins get a "Pay online" link to it.
+     * Can be overridden per site with app/config.php  'license' => ['renew_url' => 'https://…'].  '' hides the link.
+     */
+    public const RENEW_URL = '';
+
     private static ?array $cache = null;
 
     /** Is licensing enforced? Never in the TEST environment. */
@@ -174,6 +180,67 @@ final class License
         Audit::log('license_installed', 'license', null, $old ? ['lid' => $old['lid'], 'expires' => $old['expires'], 'plan' => $old['plan'] ?? null] : null,
             ['lid' => $p['lid'], 'licensee' => $p['licensee'], 'plan' => $p['plan'] ?? null, 'expires' => $p['expires'], 'domains' => $p['domains'], 'by' => $admin['name']]);
         return null;
+    }
+
+    // ------------------------------------------------------------------ online renewal (PayMongo)
+    public static function renewUrl(): string
+    {
+        $u = rtrim((string) (config('license.renew_url') ?: self::RENEW_URL), '/');
+        return preg_match('#^https?://#i', $u) ? $u : '';
+    }
+
+    /** Link to the vendor's payment page, carrying the current key (domain-locked, so safe to share) and a way back. */
+    public static function payLink(): string
+    {
+        $base = self::renewUrl();
+        if ($base === '') {
+            return '';
+        }
+        return $base . '/index.php?' . http_build_query([
+            'key' => (string) setting('license_key', ''),
+            'domain' => self::siteHost(),
+            'return' => url('admin/license.php'),
+        ]);
+    }
+
+    /**
+     * Download the newest paid key for this license from the renewal portal and install it if it extends the license.
+     * @return array{ok:bool, message:string}
+     */
+    public static function fetchRenewal(array $admin): array
+    {
+        $base = self::renewUrl();
+        $p = self::status()['payload'];
+        if ($base === '') {
+            return ['ok' => false, 'message' => 'Online renewal is not set up for this site.'];
+        }
+        if (!$p) {
+            return ['ok' => false, 'message' => 'No current license to look up. Paste the key you received by email instead.'];
+        }
+        $url = $base . '/api.php?' . http_build_query(['lid' => $p['lid'], 'domain' => self::siteHost()]);
+        $raw = null;
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 20, CURLOPT_FOLLOWLOCATION => false]);
+            $raw = curl_exec($ch);
+            curl_close($ch);
+        } else {
+            $raw = @file_get_contents($url, false, stream_context_create(['http' => ['timeout' => 20]]));
+        }
+        $res = is_string($raw) ? json_decode($raw, true) : null;
+        if (!is_array($res)) {
+            return ['ok' => false, 'message' => 'Could not reach the renewal portal. Try again later, or paste the key from your email.'];
+        }
+        if (empty($res['ok']) || empty($res['license_key'])) {
+            return ['ok' => false, 'message' => (string) ($res['error'] ?? 'No renewed license was found yet.')];
+        }
+        $new = self::parse((string) $res['license_key']);
+        if ($new['ok'] && ($new['payload']['lid'] ?? '') === $p['lid'] && (string) $new['payload']['expires'] <= (string) $p['expires']
+            && ($new['payload']['plan'] ?? '') === ($p['plan'] ?? '')) {
+            return ['ok' => false, 'message' => 'Your newest license (valid until ' . fmt_dt($p['expires'], 'F j, Y') . ') is already installed.'];
+        }
+        $err = self::install((string) $res['license_key'], $admin);
+        return $err ? ['ok' => false, 'message' => $err] : ['ok' => true, 'message' => 'Your renewed license was downloaded and installed. Thank you!'];
     }
 
     // ------------------------------------------------------------------ plan limits

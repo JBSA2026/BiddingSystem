@@ -35,7 +35,7 @@ $current = basename($_SERVER['SCRIPT_NAME'] ?? '');
 </head>
 <body class="admin" data-base="<?= e(base_url()) ?>" data-feed="<?= e(url('admin/notifications_feed.php')) ?>" data-notif-page="<?= e(url('admin/notifications.php')) ?>">
 <?php if (is_testing()): ?><div class="test-banner" role="note"><strong>TEST ENVIRONMENT</strong> — not the live system. <a href="<?= e(url('dev/mailbox.php')) ?>">Test mailbox</a><?php if (can('settings.manage')): ?> · <a href="<?= e(url('admin/testtools.php')) ?>">Test tools</a><?php endif; ?></div><?php endif; ?>
-<?php $lic = License::status(); if ($lic['enforced'] && in_array($lic['state'], ['expiring', 'grace'], true)): ?><div class="license-banner <?= $lic['state'] === 'grace' ? 'is-grace' : '' ?>" role="alert"><strong>License:</strong> <?= e($lic['message']) ?> <a href="<?= e(url('admin/license.php')) ?>">View license</a></div><?php endif; ?>
+<?php $lic = License::status(); if ($lic['enforced'] && in_array($lic['state'], ['expiring', 'grace'], true)): ?><div class="license-banner <?= $lic['state'] === 'grace' ? 'is-grace' : '' ?>" role="alert"><strong>License:</strong> <?= e($lic['message']) ?> <a href="<?= e(url('admin/license.php')) ?>">View license</a><?php if (License::payLink() !== ''): ?> · <a href="<?= e(url('admin/license.php#renew')) ?>"><strong>Renew online</strong></a><?php endif; ?></div><?php endif; ?>
 <div class="admin-shell">
   <aside class="admin-sidebar" id="admin-sidebar">
     <a class="admin-brand" href="<?= e(url('admin/')) ?>"><span class="logo-chip"><img src="<?= e(asset('img/logo.png')) ?>" alt="" width="40" height="40"></span><span><strong><?= e(setting('company_name', 'Cityland')) ?></strong><small>Bidding Admin</small></span></a>

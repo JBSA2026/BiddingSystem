@@ -9,6 +9,11 @@ if (is_post()) {
     if (!Rbac::can($admin['role'], 'settings.manage')) {
         abort(403, 'Only a Super Admin can install a license key.');
     }
+    if (input('action') === 'fetch') {
+        $r = License::fetchRenewal($admin);
+        flash($r['ok'] ? 'success' : 'error', $r['message']);
+        redirect('admin/license.php');
+    }
     $err = License::install((string) ($_POST['license_key'] ?? ''), $admin);
     if ($err) {
         flash('error', $err);
@@ -72,9 +77,31 @@ View::adminHeader('License');
       <tr><th>Active published properties</th><td><?= $meter($usedProps, $maxProps) ?></td></tr>
     </table>
     <p class="small muted mt-2">"Active published properties" are published, non-archived properties that are upcoming, open, closed or under evaluation. Awarded, cancelled and archived properties do not count.</p>
-    <h3 class="mt-3">Renewal</h3>
-    <p class="small">To renew or upgrade, send the vendor your License ID and this site's domain (<strong><?= e(License::siteHost()) ?></strong>). You will receive a new license key to paste below. Renewing never affects your data.</p>
   </div>
+</div>
+
+<?php $pay = License::payLink(); $isTrial = strcasecmp((string) ($p['plan'] ?? ''), 'Trial') === 0;
+  $payTitle = match (true) {
+      !$p => 'Buy a license online',
+      in_array($s['state'], ['grace', 'expired', 'invalid'], true) => $isTrial ? 'Your trial has ended — subscribe online' : 'Renew now to keep the admin portal unlocked',
+      $isTrial => 'Upgrade from trial — pay online',
+      $s['state'] === 'expiring' => 'Renew online before it expires',
+      default => 'Renew early or upgrade online',
+  }; ?>
+<div class="card pay-card" id="renew">
+  <div class="card-header"><h2><?= e($payTitle) ?></h2><?php if ($pay): ?><span class="badge badge-green">PayMongo</span><?php endif; ?></div>
+  <?php if ($pay): ?>
+    <p>Pay securely online with <strong>GCash, Maya, GrabPay, QR Ph</strong> or a <strong>credit/debit card</strong>. Renewing early never loses days: the new term is added to your current expiry date<?= $isTrial ? ' (a paid plan after a trial starts on the payment date)' : '' ?>. Your data is never affected.</p>
+    <div class="btn-row">
+      <a class="btn btn-gold" href="<?= e($pay) ?>" target="_blank" rel="noopener">Pay online &amp; renew ↗</a>
+      <?php if ($p && can('settings.manage')): ?>
+        <form method="post" class="inline-form"><?= Csrf::field() ?><button class="btn btn-outline" name="action" value="fetch" type="submit">Check for my renewed license</button></form>
+      <?php endif; ?>
+    </div>
+    <p class="small muted mt-2">After paying, come back here and click <strong>Check for my renewed license</strong>: the new key is downloaded and installed automatically. It is also emailed to you and can be pasted below.</p>
+  <?php else: ?>
+    <p class="small">To renew or upgrade, send the vendor your License ID (<strong><?= e($p['lid'] ?? '—') ?></strong>) and this site's domain (<strong><?= e(License::siteHost()) ?></strong>). You will receive a new license key to paste below. Renewing never affects your data.</p>
+  <?php endif; ?>
 </div>
 
 <?php if (can('settings.manage')): ?>
