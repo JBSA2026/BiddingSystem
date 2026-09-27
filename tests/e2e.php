@@ -167,6 +167,7 @@ $ADM->req('admin/settings.php', ['_csrf' => $ADM->csrf(), 'action' => 'save_emai
 check('Invalid email settings rejected', str_contains($ADM->last, 'valid SMTP host') && db()->query("SELECT svalue FROM settings WHERE skey='mail_driver'")->fetchColumn() === 'log', flashText($ADM->last));
 $ADM->req('admin/license.php');
 check('License page offers PayMongo online payment link', str_contains($ADM->last, 'Pay online &amp; renew') && str_contains($ADM->last, 'https://license.example.test/index.php?key=') && str_contains($ADM->last, 'domain=127.0.0.1'));
+check('License page offers email-sales option for a payment link', str_contains($ADM->last, 'mailto:sales@exigent.com.ph?subject=') && str_contains($ADM->last, 'Prefer not to pay online?'));
 $ADM->req('admin/license.php', ['_csrf' => $ADM->csrf(), 'action' => 'fetch']);
 check('Check-for-renewal without a license explains what to do', str_contains($ADM->last, 'Paste the key you received'), flashText($ADM->last));
 $uidA = (int) db()->query("SELECT id FROM users WHERE email='juan@example.com'")->fetchColumn();

@@ -36,6 +36,9 @@ final class License
      */
     public const RENEW_URL = '';
 
+    /** Sales contact for renewals paid offline (payment link / pricing by email). Override with 'license' => ['sales_email' => …]. */
+    public const SALES_EMAIL = 'sales@exigent.com.ph';
+
     private static ?array $cache = null;
 
     /** Is licensing enforced? Never in the TEST environment. */
@@ -201,6 +204,31 @@ final class License
             'domain' => self::siteHost(),
             'return' => url('admin/license.php'),
         ]);
+    }
+
+    public static function salesEmail(): string
+    {
+        $e = (string) (config('license.sales_email') ?: self::SALES_EMAIL);
+        return filter_var($e, FILTER_VALIDATE_EMAIL) ? $e : '';
+    }
+
+    /** mailto: link asking sales for pricing and a payment link, pre-filled with this installation's license details. */
+    public static function salesMailto(): string
+    {
+        $to = self::salesEmail();
+        if ($to === '') {
+            return '';
+        }
+        $p = self::status()['payload'];
+        $subject = 'License renewal request — ' . ($p['lid'] ?? 'new license') . ' (' . self::siteHost() . ')';
+        $body = "Hello,\n\nPlease send us the pricing plans and a payment link to renew / upgrade our Cityland Bidding System license.\n\n"
+            . 'Licensed to: ' . ($p['licensee'] ?? '') . "\n"
+            . 'License ID: ' . ($p['lid'] ?? '(none yet)') . "\n"
+            . 'Current plan: ' . ($p['plan'] ?? '—') . "\n"
+            . 'Expires: ' . ($p['expires'] ?? '—') . "\n"
+            . 'Site domain: ' . self::siteHost() . "\n\n"
+            . "Preferred plan and term: \n\nThank you.\n";
+        return 'mailto:' . $to . '?subject=' . rawurlencode($subject) . '&body=' . rawurlencode($body);
     }
 
     /**

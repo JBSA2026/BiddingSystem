@@ -81,7 +81,14 @@ View::adminHeader('License');
 </div>
 
 <?php $pay = License::payLink(); $isTrial = strcasecmp((string) ($p['plan'] ?? ''), 'Trial') === 0;
-  $payTitle = match (true) {
+  $sales = License::salesEmail(); $salesLink = License::salesMailto();
+  $payTitle = !$pay ? match (true) {
+      !$p => 'Buy a license',
+      in_array($s['state'], ['grace', 'expired', 'invalid'], true) => $isTrial ? 'Your trial has ended — subscribe' : 'Renew now to keep the admin portal unlocked',
+      $isTrial => 'Upgrade from trial',
+      $s['state'] === 'expiring' => 'Renew before it expires',
+      default => 'Renew early or upgrade',
+  } : match (true) {
       !$p => 'Buy a license online',
       in_array($s['state'], ['grace', 'expired', 'invalid'], true) => $isTrial ? 'Your trial has ended — subscribe online' : 'Renew now to keep the admin portal unlocked',
       $isTrial => 'Upgrade from trial — pay online',
@@ -99,7 +106,14 @@ View::adminHeader('License');
       <?php endif; ?>
     </div>
     <p class="small muted mt-2">After paying, come back here and click <strong>Check for my renewed license</strong>: the new key is downloaded and installed automatically. It is also emailed to you and can be pasted below.</p>
-  <?php else: ?>
+  <?php endif; ?>
+  <?php if ($sales): ?>
+    <div class="offline-pay<?= $pay ? ' mt-3' : '' ?>">
+      <h3><?= $pay ? 'Prefer not to pay online?' : 'Request pricing and a payment link' ?></h3>
+      <p class="small">Email <a href="<?= e($salesLink) ?>"><strong><?= e($sales) ?></strong></a> for the pricing plans and a payment link<?= $pay ? ' (or other payment options such as bank transfer or check)' : '' ?>. Include your License ID (<strong><?= e($p['lid'] ?? 'none yet') ?></strong>) and this site's domain (<strong><?= e(License::siteHost()) ?></strong>). Your license key is emailed to you <strong>after payment</strong>; paste it in the box below<?= $pay ? ' or click <strong>Check for my renewed license</strong>' : '' ?>. Renewing never affects your data.</p>
+      <a class="btn btn-outline" href="<?= e($salesLink) ?>">✉ Email sales for a payment link</a>
+    </div>
+  <?php elseif (!$pay): ?>
     <p class="small">To renew or upgrade, send the vendor your License ID (<strong><?= e($p['lid'] ?? '—') ?></strong>) and this site's domain (<strong><?= e(License::siteHost()) ?></strong>). You will receive a new license key to paste below. Renewing never affects your data.</p>
   <?php endif; ?>
 </div>

@@ -99,5 +99,7 @@ return [
     // Online license renewal: the vendor's PayMongo renewal portal. Leave '' to use the built-in default.
     'license' => [
         'renew_url' => '',
+        // Sales contact for pricing / payment links by email (default sales@exigent.com.ph).
+        'sales_email' => '',
     ],
 ];

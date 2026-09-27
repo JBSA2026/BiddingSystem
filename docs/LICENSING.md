@@ -61,6 +61,11 @@ Payment is by GCash, Maya, GrabPay, QR Ph or credit/debit card through PayMongo.
 **Check for my renewed license** on the License page and the new key is downloaded, verified and installed.
 The key is also shown on the payment confirmation page and emailed, so it can be pasted instead.
 
+**Prefer not to pay online?** The License page also has an **Email sales for a payment link** button. It opens an email to
+**sales@exigent.com.ph** that already includes the License ID, licensee, plan, expiry and domain, and asks for the pricing
+plans and a payment link. The license key is emailed after payment and can be pasted on the License page. This option is
+shown even when online payment is not set up. You can change the address with `'license' => ['sales_email' => '…']` in `app/config.php`.
+
 The site uses `RENEW_URL` in `app/lib/License.php`. You can override it per site with `'license' => ['renew_url' => '…']`
 in `app/config.php`. When it is empty, the page shows the manual renewal instructions instead.
 

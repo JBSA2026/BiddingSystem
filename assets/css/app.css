@@ -521,3 +521,5 @@ body.admin { background: var(--bg); }
 }
 .print-only { display: none; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+.pay-card .offline-pay.mt-3 { border-top: 1px solid var(--line); padding-top: 16px; }
+.pay-card .offline-pay h3 { margin: 0 0 6px; font-size: 1.02rem; }
