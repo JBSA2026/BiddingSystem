@@ -1,0 +1,93 @@
+# =====================================================================
+# Cityland Online Property Bidding — LOCAL TEST ENVIRONMENT
+#
+#   docker compose up -d --build      start   (first run takes a few minutes)
+#   docker compose down               stop    (test data is kept)
+#   docker compose down -v            stop and DELETE all test data
+#
+#   Website ............ http://localhost:8080
+#   Admin portal ....... http://localhost:8080/admin/
+#   Test mailbox ....... http://localhost:8025   (Mailpit — every email, incl. OTP codes)
+#   Database (phpMyAdmin) http://localhost:8081
+#
+# This is for testing only. It is NOT used on cPanel / the live site.
+# =====================================================================
+name: cityland-bidding-test
+
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpass
+      MARIADB_DATABASE: cityland_test
+      MARIADB_USER: cityland
+      MARIADB_PASSWORD: cityland
+      TZ: Asia/Manila
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+
+  app:
+    build: ./docker
+    image: cityland-bidding-test
+    ports:
+      - "8080:80"
+    environment: &appenv
+      CL_CONFIG: /var/cityland/config.php
+      APP_URL: http://localhost:8080
+      STORAGE_PATH: /var/cityland/storage
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: cityland_test
+      DB_USER: cityland
+      DB_PASS: cityland
+      MAIL_DRIVER: smtp
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    volumes:
+      - ./:/var/www/html
+      - citystore:/var/cityland
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  cron:
+    image: cityland-bidding-test
+    environment: *appenv
+    user: www-data
+    working_dir: /var/www/html
+    entrypoint: ["sh", "-c", "sleep 15; while true; do php cron.php >/dev/null 2>&1; sleep 60; done"]
+    volumes:
+      - ./:/var/www/html
+      - citystore:/var/cityland
+    depends_on:
+      - app
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: rootpass
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+
+volumes:
+  dbdata:
+  citystore:

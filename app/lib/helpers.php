@@ -14,6 +14,12 @@ function config(string $key, mixed $default = null): mixed
     return $value;
 }
 
+/** True when running as a TEST / STAGING environment (config app.env = 'testing'). */
+function is_testing(): bool
+{
+    return config('app.env', 'production') === 'testing';
+}
+
 /** Read a database-backed setting (admin-configurable). */
 function setting(string $key, ?string $default = null): ?string
 {

@@ -9,9 +9,15 @@ declare(strict_types=1);
  */
 final class Audit
 {
+    /** Test-data seeding only: attribute actions to a specific actor. */
+    public static ?array $forceActor = null;
+
     /** Resolve who is acting in the current request. */
     public static function actor(): array
     {
+        if (self::$forceActor !== null) {
+            return self::$forceActor;
+        }
         if (defined('IN_ADMIN') && !empty($_SESSION['admin_id'])) {
             return ['admin', (int) $_SESSION['admin_id'], (string) ($_SESSION['admin_name'] ?? '')];
         }

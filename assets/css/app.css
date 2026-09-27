@@ -55,6 +55,11 @@ code { background: #eef2f7; padding: 1px 5px; border-radius: 4px; font-size: .9e
 .container.medium { max-width: 960px; }
 .section { padding: 32px 0; }
 
+/* ---------- test environment banner ---------- */
+.test-banner { background: repeating-linear-gradient(45deg, #b42318, #b42318 14px, #c2410c 14px, #c2410c 28px); color: #fff; text-align: center; padding: 6px 12px; font-size: .88rem; position: relative; z-index: 60; }
+.test-banner a { color: #fff; font-weight: 700; }
+@media print { .test-banner { display: block !important; background: #fff; color: #b42318; border: 2px solid #b42318; } }
+
 /* ---------- header ---------- */
 .site-header { background: var(--navy); color: #fff; position: sticky; top: 0; z-index: 50; border-bottom: 3px solid var(--gold); }
 .header-inner { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 12px; }

@@ -1,5 +1,8 @@
 # Installation & Setup Guide
 
+> Want to try it first? See [TESTING.md](TESTING.md) for a ready-made test environment.
+> You do **not** need to upload `docker/`, `docker-compose.yml`, `tests/` or `dev/` to the live server. They are blocked from web access even if you do.
+
 ## 1. Requirements
 
 | Item | Minimum |
@@ -59,6 +62,7 @@ When it finishes:
 ## 5. Hardening checklist (production)
 
 - [ ] `install.php` deleted
+- [ ] `app/config.php` has `'env' => 'production'` (or no `env` line). Never `testing` on the live site.
 - [ ] HTTPS working and `force_https` set to `true`
 - [ ] `debug` set to `false` in `app/config.php`
 - [ ] **Move `storage/` outside `public_html`** (for example `/home/CPANELUSER/cityland_storage`) and update `storage_path` in `app/config.php`
@@ -80,9 +84,9 @@ server {
     index index.php;
     client_max_body_size 64M;
 
-    location ~ ^/(app|storage|install|tools|docs)(/|$) { deny all; return 404; }
+    location ~ ^/(app|storage|install|tools|docs|docker|tests)(/|$) { deny all; return 404; }
     location ~ /\.(?!well-known) { deny all; }
-    location ~* \.(sql|md|log|lock|gz|zip)$ { deny all; }
+    location ~* \.(sql|md|log|lock|gz|zip|yml|yaml|bat)$ { deny all; }
     location = /admin/_init.php { deny all; }
 
     location / { try_files $uri $uri/ =404; }

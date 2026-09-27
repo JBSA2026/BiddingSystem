@@ -5,7 +5,7 @@ DirectoryIndex index.php
 ServerSignature Off
 
 # Block hidden files, docs, SQL, logs, backups and config samples
-<FilesMatch "(^\.|\.(sql|md|log|lock|ini|sh|bak|dist|gz|zip)$|^(composer\.(json|lock)|package(-lock)?\.json)$)">
+<FilesMatch "(^\.|\.(sql|md|log|lock|ini|sh|bak|dist|gz|zip|yml|yaml|bat)$|^Dockerfile$|^(composer\.(json|lock)|package(-lock)?\.json)$)">
   Require all denied
 </FilesMatch>
 <Files ".htaccess">
@@ -13,7 +13,7 @@ ServerSignature Off
 </Files>
 
 # Private folders (each also has its own deny-all .htaccess)
-RedirectMatch 404 ^/(.*/)?(app|storage|install|tools|docs)(/.*)?$
+RedirectMatch 404 ^/(.*/)?(app|storage|install|tools|docs|docker|tests)(/.*)?$
 
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"

@@ -21,10 +21,20 @@ VIEW PROPERTY → REGISTER → VERIFY ACCOUNT → REVIEW TERMS → SUBMIT BID �
 | Security | Argon2id/bcrypt hashing, CSRF protection, prepared statements, output escaping, strict CSP, secure uploads, rate limiting, lockout, session expiry, admin TOTP 2FA |
 | Privacy | Privacy Notice, versioned Terms, recorded consents (date/time, user, version), GPS consent, retention policy, DPO contact (RA 10173 / NPC principles) |
 
+## Try it first: test environment
+
+```
+docker compose up -d --build
+```
+This starts the website at http://localhost:8080, the admin portal at `/admin`, a fake inbox at http://localhost:8025 and phpMyAdmin at http://localhost:8081.
+It comes with test accounts and sample properties in every status. XAMPP and cPanel staging options, the test accounts and a
+UAT checklist are in **[docs/TESTING.md](docs/TESTING.md)**.
+
 ## Documentation
 
 | Document | For |
 |---|---|
+| [docs/TESTING.md](docs/TESTING.md) | Test environment (Docker / XAMPP / staging), test accounts, UAT checklist |
 | [docs/INSTALL.md](docs/INSTALL.md) | Installation and setup on cPanel or a VPS |
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Database, SMTP email, SMS, CAPTCHA, security and all settings |
 | [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md) | Administrator setup procedure and day-to-day operation |
@@ -55,5 +65,7 @@ storage/                                   Private uploads, backups, logs, sessi
 tools/                                     CLI utilities (create admin, demo data)
 cron.php                                   Scheduled tasks (closing, reminders, email, backups)
 install.php                                Web installer (delete after use)
+dev/mailbox.php, admin/testtools.php       Test-mode only (return 404 on the live site)
+docker/, docker-compose.yml, tests/        Local test environment and automated tests (not needed on cPanel)
 docs/                                      Documentation
 ```

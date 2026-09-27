@@ -8,7 +8,10 @@ define('APP_ROOT', dirname(__DIR__));
 define('APP_DIR', __DIR__);
 define('APP_VERSION', '1.0.0');
 
-if (!is_file(APP_DIR . '/config.php')) {
+// CL_CONFIG lets a test/staging environment keep its config outside the code folder (e.g. Docker).
+define('APP_CONFIG_FILE', (getenv('CL_CONFIG') ?: '') !== '' ? (string) getenv('CL_CONFIG') : APP_DIR . '/config.php');
+
+if (!is_file(APP_CONFIG_FILE)) {
     if (PHP_SAPI !== 'cli' && is_file(APP_ROOT . '/install.php')) {
         header('Location: ' . (str_contains($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') ? '../' : '') . 'install.php');
         exit;
@@ -16,7 +19,7 @@ if (!is_file(APP_DIR . '/config.php')) {
     exit("Configuration missing. Copy app/config.sample.php to app/config.php or run install.php.\n");
 }
 
-$GLOBALS['__config'] = require APP_DIR . '/config.php';
+$GLOBALS['__config'] = require APP_CONFIG_FILE;
 
 spl_autoload_register(static function (string $class): void {
     $file = APP_DIR . '/lib/' . basename(str_replace('\\', '/', $class)) . '.php';

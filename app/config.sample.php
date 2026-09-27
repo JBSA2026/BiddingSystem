@@ -14,6 +14,9 @@ return [
         // or https://www.example.com/bidding if installed in a sub-folder.
         'url'       => 'https://bidding.example.com',
         'timezone'  => 'Asia/Manila',
+        // 'production' for the live site. 'testing' shows a TEST ENVIRONMENT banner, enables the
+        // test mailbox (/dev/mailbox.php) and admin test tools. NEVER use 'testing' on the live site.
+        'env'       => 'production',
         // Set to true only while troubleshooting. Never on a live site.
         'debug'     => false,
         // Redirect all http:// traffic to https:// and send HSTS header.

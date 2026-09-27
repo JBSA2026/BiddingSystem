@@ -6,12 +6,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="<?= e(Csrf::token()) ?>">
 <title><?= e($pageTitle ? $pageTitle . ' · ' : '') ?><?= e(setting('site_name', 'Cityland Online Property Bidding')) ?></title>
+<?php if (is_testing()): ?><meta name="robots" content="noindex, nofollow"><?php endif; ?>
 <meta name="description" content="Official Cityland online bidding for condominium units, parking slots and other properties.">
 <link rel="icon" href="<?= e(asset('img/favicon.svg')) ?>" type="image/svg+xml">
 <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
 </head>
 <body class="<?= e($bodyClass) ?>" data-base="<?= e(base_url()) ?>">
 <a class="skip-link" href="#main">Skip to content</a>
+<?php if (is_testing()): ?><div class="test-banner" role="note"><strong>TEST ENVIRONMENT</strong> — for testing only. Bids here are not real. <a href="<?= e(url('dev/mailbox.php')) ?>">Open test mailbox</a> (verification codes &amp; emails)</div><?php endif; ?>
 <header class="site-header">
   <div class="container header-inner">
     <a class="brand" href="<?= e(url('')) ?>">

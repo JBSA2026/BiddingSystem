@@ -14,6 +14,9 @@ $nav = [
     ['settings.php', 'Settings', 'settings.manage'],
     ['backup.php', 'Backup', 'backup.manage'],
 ];
+if (is_testing()) {
+    $nav[] = ['testtools.php', 'Test tools', 'settings.manage'];
+}
 $current = basename($_SERVER['SCRIPT_NAME'] ?? '');
 ?>
 <!doctype html>
@@ -28,6 +31,7 @@ $current = basename($_SERVER['SCRIPT_NAME'] ?? '');
 <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
 </head>
 <body class="admin" data-base="<?= e(base_url()) ?>">
+<?php if (is_testing()): ?><div class="test-banner" role="note"><strong>TEST ENVIRONMENT</strong> — not the live system. <a href="<?= e(url('dev/mailbox.php')) ?>">Test mailbox</a><?php if (can('settings.manage')): ?> · <a href="<?= e(url('admin/testtools.php')) ?>">Test tools</a><?php endif; ?></div><?php endif; ?>
 <div class="admin-shell">
   <aside class="admin-sidebar" id="admin-sidebar">
     <a class="admin-brand" href="<?= e(url('admin/')) ?>"><img src="<?= e(asset('img/logo.svg')) ?>" alt="" width="32" height="32"> <span><?= e(setting('company_name', 'Cityland')) ?><small>Bidding Admin</small></span></a>
