@@ -1,0 +1,10 @@
+app/config.php
+storage/uploads/*
+storage/backups/*
+storage/logs/*
+storage/sessions/
+storage/installed.lock
+!storage/uploads/.gitkeep
+!storage/backups/.gitkeep
+!storage/logs/.gitkeep
+.DS_Store
