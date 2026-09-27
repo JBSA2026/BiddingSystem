@@ -65,19 +65,29 @@ Scheduled tasks: use **Admin → Test tools → Run scheduled tasks now**, or ru
 
 ---
 
-## Option C — cPanel staging subdomain
+## Option C — cPanel test / staging site (recommended for sharing with staff)
 
-Use this so Cityland staff can test from their own phones and PCs.
+Cityland staff can test from their own phones and PCs, on the same kind of server as the live site.
 
-1. In cPanel, create a subdomain such as `test-bidding.yourdomain.com` and a separate database, for example `cpuser_bidtest`.
-2. Upload the package into the subdomain's folder and run `https://test-bidding.yourdomain.com/install.php`.
-3. Edit `app/config.php` and add `'env' => 'testing',` inside the `'app' => [ … ]` section.
-4. Sign in to `/admin` → **Test tools** → **Reset test data** to load the test accounts and properties.
-   Or, with cPanel *Terminal*, run `php tools/testenv.php reset`.
-5. **Protect the staging site**: cPanel → **Directory Privacy** → password-protect the subdomain folder. The test mailbox is otherwise open to anyone who finds the address.
-6. Add the cron job (see INSTALL.md) so scheduled closing and emails run.
+1. **Subdomain**: in cPanel → **Domains** (or **Subdomains**), create for example `test-bidding.yourdomain.com`.
+   Note its document root, for example `/home/CPANELUSER/test-bidding.yourdomain.com`.
+2. **PHP version**: in cPanel → **MultiPHP Manager**, set that subdomain to **PHP 8.1 or newer**.
+   In **Select PHP Version → Extensions**, make sure `pdo_mysql`, `mbstring`, `fileinfo`, `gd`, `zip` and `curl` are ticked.
+3. **Database**: in cPanel → **MySQL® Databases**, create a *separate* database (for example `cpuser_bidtest`) and a user, and add the user with **ALL PRIVILEGES**.
+4. **Upload**: in **File Manager**, open the subdomain folder, **Upload** `cityland-bidding-cpanel.zip` and **Extract** it there.
+   The files, including `index.php`, `install.php` and the hidden `.htaccess`, must sit directly in that folder, not in a sub-folder.
+   Tick *Settings → Show Hidden Files* to see `.htaccess`.
+5. **SSL**: in cPanel → **SSL/TLS Status**, run **AutoSSL** for the subdomain.
+6. **Install**: open `https://test-bidding.yourdomain.com/install.php`. Choose **Test / staging site**, enter the database details and your own admin account, and click **Install**.
+   The final screen lists all the test accounts.
+7. **Protect it**: in cPanel → **Directory Privacy**, open the subdomain folder, tick *Password protect this directory*, and create a username and password for your testers.
+   The test mailbox is otherwise open to anyone who finds the address.
+8. **Cron (optional for testing)**: in cPanel → **Cron Jobs**, add *Once Per Minute*: `/usr/local/bin/php /home/CPANELUSER/test-bidding.yourdomain.com/cron.php >/dev/null 2>&1`
+   Bidding still closes on time without cron. Cron sends the closing reminders and runs backups. You can also use **Admin → Test tools → Run scheduled tasks now**.
+9. Delete `install.php`. It is already locked, but deleting it is good practice.
 
-Use a **separate** database and subdomain. Never switch the live site to `testing`.
+To start over, use **Admin → Test tools → Reset test data**.
+When testing is finished, install the live site **fresh** with the **Live site** option, on its own domain and database. Do not copy the test site's `app/config.php`.
 
 ---
 

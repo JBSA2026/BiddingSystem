@@ -93,6 +93,7 @@ $v = static fn(string $k, string $d = '') => h($_POST[$k] ?? $d);
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $requiredOk) {
     $in = static fn(string $k) => trim((string) ($_POST[$k] ?? ''));
     $url = rtrim($in('app_url'), '/');
+    $testMode = ($_POST['install_type'] ?? '') === 'testing';
     $adminPw = (string) ($_POST['admin_password'] ?? '');
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
         $errors[] = 'Enter a valid site URL.';
@@ -138,10 +139,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $requiredOk) {
                 ->execute([$in('admin_name'), strtolower($in('admin_email')), password_hash($adminPw, $algo), 'super_admin']);
 
             $config = [
-                'app' => ['url' => $url, 'timezone' => 'Asia/Manila', 'debug' => false, 'force_https' => str_starts_with($url, 'https://'),
+                'app' => ['url' => $url, 'timezone' => 'Asia/Manila', 'env' => $testMode ? 'testing' : 'production', 'debug' => false, 'force_https' => str_starts_with($url, 'https://'),
                     'secret_key' => bin2hex(random_bytes(32)), 'storage_path' => '__DIR__/../storage', 'max_upload_mb' => 10],
                 'db' => ['host' => $in('db_host'), 'port' => (int) ($in('db_port') ?: 3306), 'name' => $in('db_name'), 'user' => $in('db_user'), 'pass' => (string) ($_POST['db_pass'] ?? ''), 'charset' => 'utf8mb4'],
-                'mail' => ['driver' => $in('mail_driver') ?: 'smtp', 'host' => $in('mail_host'), 'port' => (int) ($in('mail_port') ?: 465), 'encryption' => $in('mail_encryption'),
+                // Test installs keep emails in the Test mailbox (the sample accounts use non-deliverable @test.local addresses).
+                'mail' => ['driver' => $testMode ? 'log' : ($in('mail_driver') ?: 'smtp'), 'host' => $in('mail_host'), 'port' => (int) ($in('mail_port') ?: 465), 'encryption' => $in('mail_encryption'),
                     'username' => $in('mail_username'), 'password' => (string) ($_POST['mail_password'] ?? ''), 'from_email' => $in('mail_from') ?: $in('mail_username'),
                     'from_name' => ($in('company_name') ?: 'Cityland') . ' Property Bidding', 'timeout' => 15],
                 'sms' => ['provider' => 'none', 'api_key' => '', 'sender_name' => 'CITYLAND', 'http_url' => '', 'http_method' => 'POST'],
@@ -159,7 +161,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $requiredOk) {
                 @mkdir($root . '/storage/' . $d, 0750, true);
             }
             file_put_contents($lockFile, date('c'));
-            $done = ['url' => $url, 'cron_key' => $config['security']['cron_key'], 'triggers' => $triggerNote];
+            $done = ['url' => $url, 'cron_key' => $config['security']['cron_key'], 'triggers' => $triggerNote, 'test' => $testMode, 'seed' => []];
+            if ($testMode) {
+                @set_time_limit(300);
+                require $root . '/app/bootstrap.php';
+                $done['seed'] = TestEnv::seed();
+            }
         } catch (Throwable $e) {
             $errors[] = 'Installation failed: ' . $e->getMessage();
         }
@@ -171,8 +178,19 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $requiredOk) {
 <body><header class="site-header"><div class="container header-inner"><span class="brand"><img src="assets/img/logo.svg" alt="" width="40" height="40"><span class="brand-text"><strong>Cityland</strong><small>Installer</small></span></span></div></header>
 <main class="container medium section">
 <?php if ($done): ?>
-  <div class="card"><h1>Installation complete</h1>
+  <div class="card"><h1>Installation complete<?= $done['test'] ? ' — TEST environment' : '' ?></h1>
     <div class="alert alert-success">The database was created and your Super Admin account is ready. <?= h($done['triggers']) ?></div>
+    <?php if ($done['test']): ?>
+      <div class="alert alert-warning"><strong>Test mode is ON.</strong> A red TEST ENVIRONMENT banner shows on every page, emails go to the
+        <a href="<?= h($done['url']) ?>/dev/mailbox.php">test mailbox</a>, and admins get a <strong>Test tools</strong> page. Loaded: <?= h(implode('; ', $done['seed'])) ?>.</div>
+      <h2>Test accounts</h2>
+      <table class="kv">
+        <tr><th>Your Super Admin</th><td><?= h($_POST['admin_email'] ?? '') ?> (the password you chose)</td></tr>
+        <?php foreach (TestEnv::ADMINS as [$n, $em, $r]): ?><tr><th><?= h(Rbac::label($r)) ?></th><td><?= h($em) ?> / <code><?= h(TestEnv::ADMIN_PASSWORD) ?></code></td></tr><?php endforeach; ?>
+        <?php foreach (TestEnv::BIDDERS as [$n, , $em, , $st]): ?><tr><th>Bidder (<?= h($st) ?>)</th><td><?= h($em) ?> / <code><?= h(TestEnv::BIDDER_PASSWORD) ?></code></td></tr><?php endforeach; ?>
+      </table>
+      <p class="mt-2">Password-protect this test site in cPanel → <em>Directory Privacy</em> so only your testers can open it. See <code>docs/TESTING.md</code> for the UAT checklist.</p>
+    <?php endif; ?>
     <h2>Next steps</h2>
     <ol>
       <li><strong>Delete <code>install.php</code></strong> from the server now.</li>
@@ -190,7 +208,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $requiredOk) {
   <?php if ($requiredOk): ?>
   <?php if ($errors): ?><div class="alert alert-error"><ul><?php foreach ($errors as $er): ?><li><?= h($er) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
   <form method="post" class="card" autocomplete="off">
-    <h2>2. Site</h2>
+    <h2>2. Installation type</h2>
+    <label class="check"><input type="radio" name="install_type" value="production" <?= ($_POST['install_type'] ?? 'production') === 'production' ? 'checked' : '' ?>><span><strong>Live site</strong> — clean installation for real bidding.</span></label>
+    <label class="check"><input type="radio" name="install_type" value="testing" <?= ($_POST['install_type'] ?? '') === 'testing' ? 'checked' : '' ?>><span><strong>Test / staging site</strong> — turns on test mode (TEST banner, test mailbox, Test tools) and loads sample accounts and properties in every bidding status. Emails stay in the test mailbox. Use a separate subdomain and database, never the live one.</span></label>
+    <h2 class="mt-2">Site</h2>
     <div class="form-row"><div class="form-group"><label class="form-label" for="app_url">Site URL (no trailing slash)</label><input class="form-control" id="app_url" name="app_url" value="<?= $v('app_url', $guessUrl) ?>" required></div>
       <div class="form-group"><label class="form-label" for="company_name">Company name</label><input class="form-control" id="company_name" name="company_name" value="<?= $v('company_name', 'Cityland') ?>"></div></div>
     <div class="form-group"><label class="form-label" for="contact_email">Public contact email</label><input class="form-control" type="email" id="contact_email" name="contact_email" value="<?= $v('contact_email') ?>"></div>
